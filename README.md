@@ -3,6 +3,6 @@
 # group-template
 Template do Repositório de Grupo
 
-* Aluno1: Nome1
-* Aluno2: Nome2
-* Aluno3: Nome3
+* Aluno1: Cátia Alexandra Ribeiro da Eira - A107382
+* Aluno2: Filipa Cosquete Santos - A106837
+* Aluno3: Marco Rocha Ferreira - A106857
