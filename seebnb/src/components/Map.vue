@@ -163,27 +163,42 @@
 <script>
     /*
     falta definições de popup (fechar quando se clica fora)
-    falta passar a cidade q estamos a pesquisar (lisboa hardcoded)
     adicionar lista com as coordenadas das cidades? fazer fetch automático?
     */
-
-  import { MarkerClusterer } from "@googlemaps/markerclusterer";
-  import { ClusterRenderer } from '../utils/ClusterRenderer.js';
-  import { MapStyle } from "../utils/MapStyle.js";
+  import RBush from "rbush";
+  import {MarkerClusterer} from "@googlemaps/markerclusterer";
+  import {ClusterRenderer} from '../utils/ClusterRenderer.js';
+  import {MapStyle} from "../utils/MapStyle.js";
 
   export default {
     name: "MapView",
+    props: {
+      listings: {
+        type: Array,
+        required: true,
+        default: () => []
+      },
+      cityName: String
+    },
     data() {
       return {
-        allListings: [],            // json of the listings
+        allListings: null, // json of the listings
         allMarkers: new Map(),      // stores all created markers
         visibleMarkers: new Map(),  // stores the visible markers
-
+        spatialIndex: null,         // index with the listings' locations
         state: 'listings' // state: listings, price, occupancy
       }
     },
     watch: {
-      state(newState) {
+      listings: {   // whenever the parent updates the listings we need to refresh the data
+        immediate: true, 
+        handler(newListings) {
+          this.restartMap(newListings);
+        }
+      },
+
+      state(newState) {   // change the viewing mode
+        if (!this.map || !this.spatialIndex) return;
         console.log("current mode:", newState);
 
         this.markerCluster.clearMarkers();
@@ -202,11 +217,6 @@
     
     async mounted() {
       if (window.google && window.google.maps) {
-        const response = await fetch('http://localhost:3000/lisbon_listings'); // << hardcoded!!!
-        this.allListings = await response.json();
-        console.log(`Successfully loaded ${this.allListings.length} APs.`);
-        console.log (this.allListings[0]);
-
         this.initMap();
       } else {
         const checkInterval = setInterval(() => {
@@ -235,16 +245,15 @@
         await window.google.maps.importLibrary("marker");
         await window.google.maps.importLibrary("visualization");
 
-        const center = { lat: 38.7223, lng: -9.1393 }; // Lisbon
         // Create map
         this.map = new window.google.maps.Map(this.$refs.mapContainer, {
           styles: MapStyle,
-          center,
           mapTypeControl: false,
           streetViewControl: false,
           zoom: 13,
           mapTypeId: "roadmap"
         });
+        this.centerMapOnData();
 
         this.markerCluster = new MarkerClusterer({ 
           map: this.map, 
@@ -270,7 +279,6 @@
                      'rgba(210, 30, 30, 1)'       // stronger red
                     ]
         });
-        this.calculateHeatmaps();
 
         this.infoWindow = new window.google.maps.InfoWindow({ maxWidth: 300 });
 
@@ -278,7 +286,42 @@
           if (this.infoWindow) this.infoWindow.close();
         });
 
-        // listens when the user isnt moving the map (idle)
+        await this.restartMap(this.listings);
+      },
+
+      async restartMap(newListings) {
+        if (!this.map || newListings.length === 0) return;
+
+        this.markerCluster.clearMarkers();
+        this.visibleMarkers.clear();
+        this.allMarkers.clear(); 
+        this.heatmap.setMap(null);
+
+        this.centerMapOnData();
+
+        this.allListings = newListings.map(item => ({
+          ...item,
+          _latLng: new window.google.maps.LatLng( // precalculating the latlng 
+            parseFloat(item.latitude),
+            parseFloat(item.longitude)
+          )
+        }));
+        this.spatialIndex = new RBush();
+
+        this.spatialIndex.load(
+          this.allListings.map(item => ({
+            minX: item._latLng.lng(),
+            minY: item._latLng.lat(),
+            maxX: item._latLng.lng(),
+            maxY: item._latLng.lat(),
+            item: item,
+          }))
+        );
+        this.calculateHeatmaps();
+
+        this.state = 'listings'
+
+        // listens when the user isnt moving the map (idle)     
         this.map.addListener("idle", () => {
           if (this.state === "listings")
             this.fetchVisibleListings();
@@ -286,84 +329,80 @@
       },
 
       fetchVisibleListings() {  // only loads the visible markers
-        if (!this.map || this.allListings.length === 0) return;
+        if (!this.map || !this.spatialIndex) return;
 
         const bounds = this.map.getBounds();
         if (!bounds) return;
 
-        const visibleItems = this.allListings.filter(item => {
-          const lat = parseFloat(item.latitude);
-          const lng = parseFloat(item.longitude);
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
 
-          return bounds.contains(new window.google.maps.LatLng(lat, lng));
+        console.log ("calculating spatial index")
+        const results = this.spatialIndex.search({
+          minX: sw.lng(),
+          minY: sw.lat(),
+          maxX: ne.lng(),
+          maxY: ne.lat(),
         });
+        console.log("finished using spatial index")
 
+        const visibleItems = results
+          .map(r => r.item);
+
+        console.log(visibleItems.length , " visible items");
+        console.log (visibleItems[0])
         this.updateMarkers(visibleItems);
       },
 
       updateMarkers(listings) {
-        const currentIds = new Set(listings.map(item => item.id));
-        const markersToAdd = [];
+        const markers = [];
 
-        // removing markers that are no longer in the current view
-        for (const [id, marker] of this.visibleMarkers.entries()) {
-          if (!currentIds.has(id)) {
-            this.markerCluster.removeMarker(marker, true); // remove from cluster
-            this.visibleMarkers.delete(id);                // delete from visible
+        for (const item of listings) {
+          if (!item._latLng) {
+            console.log("no lat lng!")
+            continue;
           }
+
+          let marker = this.allMarkers.get(item.id);
+
+          if (!marker) {                       // create a new marker if its a new one
+            marker = new window.google.maps.Marker({
+              position: item._latLng,
+              icon: {
+                path: window.google.maps.SymbolPath.CIRCLE,
+                fillColor: "#d6f07ad9",
+                fillOpacity: 0.9,
+                scale: 5,
+                strokeColor: "white",
+                strokeWeight: 1,
+              },
+              title: item.name,
+            });
+
+            marker.addListener("click", () => { // click listener, adds popup for marker
+              const contentString = `
+                <div style="color: #333; font-family: sans-serif; padding: 3px">
+                  <h3 style="margin: 0 0 5px 0; font-size: 16px;">${item.name}</h3>
+                  <a href="${item.listing_url}" target="_blank" style="color: #e2849d; font-weight: bold;">
+                    View Listing
+                  </a>
+                  ${item.picture_url ? `<img src="${item.picture_url}" style="width:100%; border-radius:8px; margin-top:8px;" />` : ''}
+                </div>
+              `;
+
+              this.infoWindow.setContent(contentString);
+              this.infoWindow.open(this.map, marker);
+            });
+
+            this.allMarkers.set(item.id, marker);
+          }
+          markers.push(marker);
         }
-
-        listings.forEach(item => {
-          if (!this.visibleMarkers.has(item.id)) { 
-            const lat = parseFloat(item.latitude);
-            const lng = parseFloat(item.longitude);
-
-            let marker = null;
-
-            if (!isNaN(lat) && !isNaN(lng)) { 
-              if (this.allMarkers.has(item.id)) {
-                marker = this.allMarkers.get(item.id);     // fetch from existing map
-              }
-              else {                                       // or create a new marker if its a new one
-                marker = new window.google.maps.Marker({
-                  position: { lat, lng },
-                  icon: {
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    fillColor: "#d6f07ad9",
-                    fillOpacity: 0.9,
-                    scale: 5,
-                    strokeColor: "white",
-                    strokeWeight: 1,
-                  },
-                  title: item.name
-                });
-
-                // click listener
-                marker.addListener("click", () => {
-                  const contentString = `
-                    <div style="color: #333; font-family: sans-serif; padding: 3px">
-                      <h3 style="margin: 0 0 5px 0; font-size: 16px;">${item.name}</h3>
-                      <a href="${item.listing_url}" target="_blank" style="color: #e2849d; text-decoration: none; font-weight: bold;">
-                        View Listing
-                      </a>
-                      ${item.picture_url ? `<img src="${item.picture_url}" style="width:100%; border-radius:8px; margin-top:8px;" />` : ''}
-                    </div>
-                  `;
-                  
-                  this.infoWindow.setContent(contentString);
-                  this.infoWindow.open(this.map, marker);
-                });
-
-                this.allMarkers.set(item.id, marker);
-              }
-              this.visibleMarkers.set(item.id, marker);
-              markersToAdd.push(marker);
-            }
-          }
-        });
-        if (markersToAdd.length > 0) {
-          console.log("Adding ", markersToAdd.length, " markers");
-          this.markerCluster.addMarkers(markersToAdd);
+        if (markers.length > 0) {
+          console.log ("painting ", markers.length)
+          console.log(markers[0])
+          this.markerCluster.clearMarkers();
+          this.markerCluster.addMarkers(markers);
         }
       },
 
@@ -381,7 +420,7 @@
             }
             
             if (isNaN(weight) || weight <= 0) return null;
-            return { location: new window.google.maps.LatLng(item.latitude, item.longitude), weight };
+            return { location: item._latLng, weight };
           }).filter(Boolean);
 
           let intensity = 1;
@@ -400,7 +439,19 @@
           this.heatmap.setData(cached.data);
           this.heatmap.setMap(this.map);
         }
+      },
+      centerMapOnData() {
+        this.geocoder = new window.google.maps.Geocoder();
+        this.geocoder.geocode({ address: this.cityName }, (results, status) => {
+        if (status === "OK") {
+          const cityCenter = results[0].geometry.location;
+          
+          this.map.setCenter(cityCenter);
+        } else {
+          console.error("Geocode failed: " + status);
+        }
+      });
       }
     }
-  };
+};
 </script>

@@ -13,9 +13,10 @@
     "lint": "eslint . --fix --cache"
   },
   "dependencies": {
+    "@googlemaps/markerclusterer": "^2.6.2",
+    "rbush": "^4.0.1",
     "vue": "^3.5.25",
-    "vue-router": "^4.3.0",
-    "@googlemaps/markerclusterer": "^2.6.2"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
