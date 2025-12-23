@@ -1,6 +1,9 @@
+<template>
+    <MostVisitedCities></MostVisitedCities>
+</template>
 
-<template></template>
-
-<script></script>
+<script setup>
+    import MostVisitedCities from '../components/MostVisitedCities.vue';
+</script>
 
 <style scoped></style>

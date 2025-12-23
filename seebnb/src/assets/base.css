@@ -1,5 +1,6 @@
 :root[theme="light"] {
   --text: #10160e;
+  --image_text: #ebf1e9;
   --background: #f4f7f2;
   --primary: #405134;
   --secondary: #94bca4;
@@ -9,6 +10,7 @@
 @media (prefers-color-scheme: dark) {
   :root[theme="dark"] {
     --text: #ebf1e9;
+    --image_text: #10160e;
     --background: #0a0d08;
     --primary: #bacbae;
     --secondary: #436b53;
