@@ -1,49 +1,71 @@
 <template>
-    <div class="full-wrapper">
-        <nav id="topbar">
-            <button class="nav-btn" 
-                id="listings"
-                :class="{active: state === 'listings'}"
-                @click="state = 'listings'">
-                Localizações das ALs
-            </button>
+  <div
+    v-if="state !== 'preview'"
+    class="backdrop"
+    @click="state = 'preview'"
+  />
 
-            <button class="nav-btn" 
-                id="price"
-                :class="{active: state === 'price'}"
-                @click="state = 'price'">
-                Preço por Zona
-            </button>
+  <div
+    class="full-wrapper"
+    :class="{ 'is-popup': state !== 'preview' }"
+    @click="state === 'preview' ? state = 'listings' : null">
 
-            <button class="nav-btn" 
-                id="occupancy"
-                :class="{active: state === 'occupancy'}"
-                @click="state = 'occupancy'">
-                Ocupação por Zona
-            </button>
-        </nav>
+    <nav id="topbar" v-if= "state !== 'preview'">
+          <button class="nav-btn" 
+              id="listings"
+              :class="{active: state === 'listings'}"
+              @click="state = 'listings'">
+              Localizações das ALs
+          </button>
 
-        <div class="map-wrapper">
-            <div ref="mapContainer" class="map"></div>
-            <transition name="fade">
-                <div v-if="state === 'price' || state === 'occupancy'" class="heatmap-legend">
-                    <h4>{{ state === 'price' ? 'Price per Night' : 'Annual Occupancy' }}</h4>
-                    
-                    <div class="legend-bar"></div>
-                    
-                    <div class="legend-labels">
-                        <span>$0</span>
-                        <span>{{ currentIntensityLabel }}+</span>
-                    </div>
-                </div>
-            </transition>
-        </div>
+          <button class="nav-btn" 
+              id="price"
+              :class="{active: state === 'price'}"
+              @click="state = 'price'">
+              Preço por Zona
+          </button>
+
+          <button class="nav-btn" 
+              id="occupancy"
+              :class="{active: state === 'occupancy'}"
+              @click="state = 'occupancy'">
+              Ocupação por Zona
+          </button>
+          <button class="close-btn" @click.stop="state = 'preview'">x</button>
+      </nav>
+      <div class="map-wrapper">
+          <div ref="mapContainer" class="map"></div>
+          <transition name="fade">
+              <div v-if="state === 'price' || state === 'occupancy'" class="heatmap-legend">
+                  <h4>{{ state === 'price' ? 'Preço por noite' : 'Ocupação anual' }}</h4>
+                  
+                  <div class="legend-bar"></div>
+                  
+                  <div class="legend-labels">
+                      <span>$0</span>
+                      <span>{{ currentIntensityLabel }}+</span>
+                  </div>
+              </div>
+          </transition>
+      </div>
   </div>
 </template>
 
 <style scoped>
-
 .full-wrapper {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  background: none;
+  box-shadow: none;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 0; 
+  transition: all 0.3s ease;
+}
+
+.full-wrapper.is-popup {
   position:fixed;
   top: 100px;   
   left: 50%;
@@ -59,23 +81,31 @@
   background: black;
 }
 
+.map-wrapper, .map {
+  width: 100%;
+  height: 100%;
+}
+
 #topbar {
   position: absolute;
-  display: flex;
-  top: 0px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  flex-direction: row; 
-  justify-content: space-evenly;
-  align-items: center;
-  z-index: 10;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 50px;
-  text-align: center;
-  padding: 1%;
-  border-radius: 0px 45px;
-  background-color: #AAE4E2; /* var(--cor_barra) */
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  background-color: #AAE4E2;
+  border-radius: 0px 45px 0 0;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999; 
 }
 
 .nav-btn {
@@ -98,16 +128,6 @@
 .nav-btn.active {
   box-shadow: 0px 2px 6px 2px #CBD2FF, /* var(--cor_fundo)*/
               inset 0px 2px 6px 2px #CBD2FF; /* var(--cor_fundo)*/
-}
-
-.map-wrapper {
-  width: 100%;
-  height: 100%
-}
-
-.map {
-  width: 100%;
-  height: 100%;
 }
 
 .heatmap-legend {
@@ -150,21 +170,32 @@
   font-weight: bold;
   color: #666;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
+
+.close-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  transition: transform 0.2s;
 }
-.fade-enter, .fade-leave-to {
-  opacity: 0;
+
+.close-btn:hover {
+  transform: scale(1.1);
+  background: #ff4747;
 }
 
 </style>
 
 
 <script>
-    /*
-    falta definições de popup (fechar quando se clica fora)
-    adicionar lista com as coordenadas das cidades? fazer fetch automático?
-    */
   import RBush from "rbush";
   import {MarkerClusterer} from "@googlemaps/markerclusterer";
   import {ClusterRenderer} from '../utils/ClusterRenderer.js';
@@ -182,11 +213,10 @@
     },
     data() {
       return {
-        allListings: null, // json of the listings
+        allListings: null,          // json of the listings
         allMarkers: new Map(),      // stores all created markers
-        visibleMarkers: new Map(),  // stores the visible markers
         spatialIndex: null,         // index with the listings' locations
-        state: 'listings' // state: listings, price, occupancy
+        state: 'preview'            // state: preview, listings, price, occupancy
       }
     },
     watch: {
@@ -197,12 +227,12 @@
         }
       },
 
-      state(newState) {   // change the viewing mode
+      async state(newState) {   // change the viewing mode
         if (!this.map || !this.spatialIndex) return;
         console.log("current mode:", newState);
 
-        this.markerCluster.clearMarkers();
-        this.visibleMarkers.clear();
+        this.markerCluster.setMap(null);
+        this.allMarkers.forEach(m => m.setVisible(false));
         this.heatmap.setMap(null);
         
         if (newState === 'listings') {
@@ -211,6 +241,9 @@
           this.showHeatmap('price');
         } else if (newState === 'occupancy') {
           this.showHeatmap('estimated_occupancy_l365d');
+        } else {
+          this.centerMapOnData();
+          this.map.setZoom(13);
         }
       }
     },
@@ -227,6 +260,7 @@
         }, 100);
       }
     },
+
     computed: {
         currentIntensityLabel() {
             const key = this.state === 'occupancy' ? 'estimated_occupancy_l365d' : this.state;
@@ -285,16 +319,13 @@
         this.map.addListener("click", () => { // close info window when clicking outside of it
           if (this.infoWindow) this.infoWindow.close();
         });
-
-        await this.restartMap(this.listings);
       },
 
       async restartMap(newListings) {
         if (!this.map || newListings.length === 0) return;
 
         this.markerCluster.clearMarkers();
-        this.visibleMarkers.clear();
-        this.allMarkers.clear(); 
+        this.markerCluster.setMap(null);
         this.heatmap.setMap(null);
 
         this.centerMapOnData();
@@ -319,12 +350,19 @@
         );
         this.calculateHeatmaps();
 
-        this.state = 'listings'
+        if (this.state === "listings") {
+            this.fetchVisibleListings();
+          }
 
         // listens when the user isnt moving the map (idle)     
+        let debounceTimer;
         this.map.addListener("idle", () => {
-          if (this.state === "listings")
-            this.fetchVisibleListings();
+            if (this.state === "listings") {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    this.fetchVisibleListings();
+                }, 100); // wait before calculating the markers
+            }
         });
       },
 
@@ -350,7 +388,7 @@
           .map(r => r.item);
 
         console.log(visibleItems.length , " visible items");
-        console.log (visibleItems[0])
+        console.log ("first item: ", visibleItems[0])
         this.updateMarkers(visibleItems);
       },
 
@@ -396,12 +434,12 @@
 
             this.allMarkers.set(item.id, marker);
           }
+          marker.setVisible(true);
           markers.push(marker);
         }
         if (markers.length > 0) {
-          console.log ("painting ", markers.length)
-          console.log(markers[0])
           this.markerCluster.clearMarkers();
+          this.markerCluster.setMap(this.map);
           this.markerCluster.addMarkers(markers);
         }
       },

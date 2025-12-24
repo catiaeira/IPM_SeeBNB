@@ -34,6 +34,7 @@
   border-radius: 0px 45px;
   background-color: var(--accent);
   font-size: 1rem;
+  z-index: 500;
 }
 
 .home-link {
