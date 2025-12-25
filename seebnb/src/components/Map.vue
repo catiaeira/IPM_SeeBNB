@@ -55,7 +55,7 @@
 .full-wrapper {
   position: relative;
   width: 100%;
-  height: 320px;
+  height: 100%;
   border-radius: 12px;
   background: none;
   box-shadow: none;
