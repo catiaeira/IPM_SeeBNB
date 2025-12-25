@@ -27,6 +27,30 @@ import { computed } from 'vue';
 import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+
+const pluginBackground = {
+  id: 'pluginBackground',
+  beforeDraw: (chart) => {
+    const { ctx, chartArea, config } = chart;
+
+    if (!chartArea) return;
+
+    const color = config.options.plugins?.chartAreaBackground?.color || '#F2FAFF' // --var(background) 
+
+    ctx.save();
+    ctx.fillStyle = color;
+    const extraHeight = 23;
+    ctx.fillRect(
+      chartArea.left, 
+      chartArea.top - extraHeight, 
+      chartArea.width, 
+      chartArea.height + extraHeight
+    );
+    
+    ctx.restore();
+  }
+};
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,19 +60,33 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ChartDataLabels
+  ChartDataLabels,
+  pluginBackground
 )
-
 const props = defineProps({
-  listings: {
+  listings: { // normal listing 
     type: Array,
     required: true,
     default: () => []
   },
-  listings2: {
+  listings2: {  // normal listing, 2nd city
     type: Array,
     required: false,
     default: () => []
+  },
+  listingsTri1: { // archived listing of the trimester
+    type: Array,
+    required: false,
+    default: () => []
+  },
+  listingsTri2: { // archived listing of the trimester
+    type: Array,
+    required: false,
+    default: () => []
+  },
+  triState: {
+    required: false,
+    default: 0
   },
   mainLabel : String
 });
@@ -63,6 +101,13 @@ const chartData = computed(() => {
 
     case 'ocupationCompare':
       return calcOcupationCompare(); 
+    
+    case 'trimestral':
+      if      (props.triState == 0) return calcTriListings();
+      else if (props.triState == 1) return calcTriPrice();
+      else if (props.triState == 2) return calcTriOccupation();
+      else return null;
+
     default:
       return null;;
   }
@@ -73,7 +118,8 @@ const chartOptions = computed (() => ({
   responsive: true,
   layout: {
     padding: {
-      top: 13,
+      top: 35,
+      bottom: -5,
       right: 5
     }
   },
@@ -83,7 +129,11 @@ const chartOptions = computed (() => ({
       anchor: 'end',  // anchoring the text to the top of the bar/point
       color: '#333'
     },
-    legend: { display: false } 
+    legend: { display: false },
+
+    customBackground: {
+      color: '#E3E7FF', // --var(cor_fundo_light) 
+    }
   },
   scales: {
     y: {
@@ -109,7 +159,7 @@ const chartOptions = computed (() => ({
 function getHostsTotalListings (listings, counts, LIMIT, LIMIT_TEXT) {
   listings.forEach(l => {
       let count = l.host_total_listings_count;
-      if (count !== undefined && count !== null) {
+      if (count !== undefined && count !== null && count > 0) {
         const bucket = count >= LIMIT ? LIMIT_TEXT : count.toString();
         counts[bucket] = (counts[bucket] || 0) + 1;
       }
@@ -298,6 +348,110 @@ function calcOcupationCompare() {
       },
       
     ],
+  }
+}
+
+function calcTriListings() {
+  const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
+
+  const dataPoints = [
+    props.listingsTri2?.length || 0,
+    props.listingsTri1?.length || 0,
+    props.listings?.length || 0
+  ];
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        type: 'line',
+        data: dataPoints,
+        borderColor: '#AAE4E2', // --var(cor_barra) 
+        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderWidth: 4,
+        tension: 0.4, 
+        pointRadius: 4,
+        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+      }
+    ]
+  };
+}
+
+function calcTriPrice() {
+  const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
+  const triLists = [props.listingsTri2, props.listingsTri1, props.listings];
+
+  const averages = triLists.map(list => {
+    let total = 0;
+    let validCount = 0;
+
+    list.forEach(l => {
+      if (l.price) {
+        const cleanPrice = parseFloat(l.price.replace(/[$,]/g, ''));
+
+        if (!isNaN(cleanPrice) && cleanPrice !== null) {
+          total += cleanPrice;
+          validCount++;
+        }
+      }
+    });
+
+    return validCount > 0 ? parseFloat((total / validCount).toFixed(2)) : 0;
+  });
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        type: 'line',
+        data: averages,
+        borderColor: '#AAE4E2', // --var(cor_barra) 
+        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderWidth: 4,
+        tension: 0.4, 
+        pointRadius: 4,
+        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+      }
+    ]
+  };
+}
+
+function calcTriOccupation() {
+  const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
+  const triLists = [props.listingsTri2, props.listingsTri1, props.listings];
+
+  const averages = triLists.map(list => {
+    let total = 0;
+    let validCount = 0;
+
+    list.forEach(l => {
+      if (l.estimated_occupancy_l365d) {
+        const cleanOccupancy = parseInt(l.estimated_occupancy_l365d);
+
+        if (!isNaN(cleanOccupancy) && cleanOccupancy !== null) {
+          total += cleanOccupancy;
+          validCount++;
+        }
+      }
+    });
+
+    return validCount > 0 ? parseFloat((total / validCount).toFixed(2)) : 0;
+  });
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        type: 'line',
+        data: averages,
+        borderColor: '#AAE4E2', // --var(cor_barra) 
+        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderWidth: 4,
+        tension: 0.4, 
+        pointRadius: 4,
+        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+      }
+    ]
   };
 }
 

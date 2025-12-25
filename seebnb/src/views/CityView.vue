@@ -8,7 +8,11 @@
         data() {
             return {
             allListings: [],
+            listingsTri1:[],
+            listingsTri2:[],
             currentCity: 'lisbon',
+            triStates: ['Listagens', 'Preço', 'Ocupação'],
+            trimestralState: 0 // listings = 0, price, occupation
             }
         },
         async created() {
@@ -18,18 +22,44 @@
             async fetchData() {
                 try {
                     console.log("Fetching data for:", this.currentCity);
-                    const response = await fetch(`http://localhost:3000/${this.currentCity}.listings`);
-                    
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    
-                    const data = await response.json();
-                    
-                    this.allListings = data; 
-                    
-                    console.log(`Successflily loaded ${this.allListings.length} listings.`);
-                    } catch (error) {
-                        console.error("Fetch failed:", error);
+                    for (let i = 0; i<3; i++){
+                      let link = `http://localhost:3000/${this.currentCity}.listings`;
+                      if (i>0) link = link.concat (`(${i})`);
+
+                      const response = await fetch(link);
+                      
+                      if (!response.ok) throw new Error('Network response was not ok');
+                      
+                      const data = await response.json();
+                      
+                      switch (i) {
+                        case 0:
+                          this.allListings = data;
+                          break;
+                        case 1:
+                          this.listingsTri1 = data;
+                          break;
+                        case 2:
+                          this.listingsTri2 = data;
+                          break;
+                        default:
+                          break;
+                      }                      
+                      console.log(`Successfully loaded ${this.allListings.length} listings.`);
+                    }
+                  } catch (error) {
+                      console.error("Fetch failed:", error);
                 }
+            },
+
+            changeTrimestralDataState(direction) {
+              let state = this.trimestralState;
+              if (direction === 'up') state ++;
+              else state --;
+              if (state < 0) state = this.triStates.length - 1;
+              else if (state > this.triStates.length - 1) state = 0;
+
+              this.trimestralState = state;
             }
         }
     }
@@ -41,7 +71,7 @@
 
     <div class="top">
 
-      <div class="stats-card">
+      <div class="stats">
         <StatsComponent
           :allListings="allListings"
           />
@@ -51,6 +81,28 @@
         <MapComponent
           :listings="allListings"
           :cityName="currentCity"
+        />
+      </div>
+    </div>
+    <div>Dados Trimestrais</div>
+    <div class="trimestral-data">
+      <div id="triButton">
+        <button id="buttonUp" @click.stop="changeTrimestralDataState('up')"></button>
+        <div id="buttonLabel">{{ triStates[trimestralState] }}</div>
+        <button id="buttonDown" @click.stop="changeTrimestralDataState('down')"></button>
+      </div>
+
+      <div id="triDots">
+        
+      </div>
+
+      <div class="trimestral-chart">
+        <BarChart
+          :listings="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2"
+          :triState="trimestralState"
+          mainLabel="trimestral"
         />
       </div>
     </div>
@@ -87,21 +139,30 @@
 }
 
 .map-card {
+  align-self: center;
+  height: 90%;
   background: #e9f4f3;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
   min-height: 360px;
-  height: 0.95rem;
-  top:50%;
-  transform: translateY(-50%);
+}
+
+.trimestral-data {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-self: center;
+  gap: 2rem; 
+}
+
+.trimestral-chart {
+  border-radius: 12px;
 }
 
 .chart {
-  background: #ffffff;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 </style>

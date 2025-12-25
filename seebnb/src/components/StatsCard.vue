@@ -18,18 +18,18 @@
             <span>{{ averageRentedNights }}</span>
           </li>
           <li class="stat-row">
-            <span>Rendimento médio</span>
+            <span>Rendimento médio (anual)</span>
             <span>${{ averageProfit}}</span>
           </li>
           <li class="stat-row">
             <span>Nº de alojamentos locais</span>
-            <span>{{ new Intl.NumberFormat('en-US').format(allListings.length) }}</span>
+            <span>{{ new Intl.NumberFormat('pt-PT').format(allListings.length) }}</span>
           </li>
           <li class="stat-row">
             <span>Percentagem de short-rentals</span>
             <span>{{shortRentalPercentage}}%</span>
           </li>
-        </ul>
+    </ul>
 </template>
 
 
@@ -41,7 +41,6 @@
         display: grid;
         grid-auto-rows: 1fr;
         gap: 0.75rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     }
 
     .stat-row {
@@ -156,18 +155,10 @@
                 this.averageRating = getAvg(totals.rating, counts.rating).toFixed(2);
                 this.averagePrice = getAvg(totals.price, counts.price).toFixed(2);
                 this.averageRentedNights = Math.round(getAvg(totals.nights, counts.nights));
-                this.averageProfit = new Intl.NumberFormat('en-US').format(getAvg(totals.profit, counts.profit).toFixed(2));
+                this.averageProfit = new Intl.NumberFormat('pt-PT').format(getAvg(totals.profit, counts.profit).toFixed(2));
                 this.shortRentalPercentage = listings.length > 0 
                     ? ((totals.shortRental / listings.length) * 100).toFixed(2) 
                     : 0;
-
-                console.log({
-                    avgRating: this.averageRating,
-                    avgPrice: this.averagePrice,
-                    avgNights: this.averageRentedNights,
-                    avgProfit: this.averageProfit,
-                    shortRentalPct: this.shortRentalPercentage
-                });
             }
         }
     }
