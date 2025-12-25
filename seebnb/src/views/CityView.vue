@@ -1,10 +1,10 @@
 <script>    
     import MapComponent from '@/components/Map.vue';
-    import BarChart from '@/components/BaseChart.vue';
+    import Chart from '@/components/BaseChart.vue';
     import StatsComponent from '@/components/StatsCard.vue';
 
     export default {
-        components : {MapComponent, BarChart, StatsComponent},
+        components : {MapComponent, Chart, StatsComponent},
         data() {
             return {
             allListings: [],
@@ -97,8 +97,8 @@
       </div>
 
       <div class="trimestral-chart">
-        <BarChart
-          :listings="allListings"
+        <Chart
+          :listings1="allListings"
           :listingsTri1="listingsTri1"
           :listingsTri2="listingsTri2"
           :triState="trimestralState"
@@ -108,8 +108,8 @@
     </div>
 
     <div class="chart">
-      <BarChart
-        :listings= "allListings"
+      <Chart
+        :listings1= "allListings"
         mainLabel="listsPerHost"
       />
     </div>

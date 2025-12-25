@@ -64,7 +64,7 @@ ChartJS.register(
   pluginBackground
 )
 const props = defineProps({
-  listings: { // normal listing 
+  listings1: { // normal listing 
     type: Array,
     required: true,
     default: () => []
@@ -108,6 +108,8 @@ const chartData = computed(() => {
       else if (props.triState == 2) return calcTriOccupation();
       else return null;
 
+    case 'listsPerMonths':
+      return calcListsPerHostMonth();
     default:
       return null;;
   }
@@ -171,7 +173,7 @@ function calcListsPerHost() {
   const LIMIT = 15;
   const LIMIT_TEXT = LIMIT + "+";
 
-  getHostsTotalListings(props.listings, counts, LIMIT, LIMIT_TEXT);
+  getHostsTotalListings(props.listings1, counts, LIMIT, LIMIT_TEXT);
 
   const sortedKeys = Object.keys(counts).sort((a, b) => {
     if (a === LIMIT_TEXT) return 1;
@@ -202,7 +204,7 @@ function calcListsPerHostCompare() {
   const LIMIT = 10;
   const LIMIT_TEXT = LIMIT + "+";
 
-  getHostsTotalListings(props.listings, counts1, LIMIT, LIMIT_TEXT)
+  getHostsTotalListings(props.listings1, counts1, LIMIT, LIMIT_TEXT)
   getHostsTotalListings(props.listings2, counts2, LIMIT, LIMIT_TEXT)
 
   // list with both keys
@@ -231,7 +233,7 @@ function calcListsPerHostCompare() {
         backgroundColor: '#FF6384',
         borderWidth: 3,
         tension: 0.4,
-        pointRadius: 0,
+        pointRadius: 2,
         datalabels: {
           display: false
         }
@@ -272,7 +274,7 @@ function countOcupation(listings, counts, buckets) {
 
 function calcOcupationCompare() {
   const allValues = [
-    ...props.listings.map(l => l.estimated_occupancy_l365d || 0),
+    ...props.listings1.map(l => l.estimated_occupancy_l365d || 0),
     ...props.listings2.map(l => l.estimated_occupancy_l365d || 0)
   ];
   
@@ -302,7 +304,7 @@ function calcOcupationCompare() {
     counts2[b.label] = 0;
   });
 
-  countOcupation(props.listings, counts1, buckets);
+  countOcupation(props.listings1, counts1, buckets);
   countOcupation(props.listings2, counts2, buckets);
 
   const labels = buckets.map(b => b.label);
@@ -325,7 +327,7 @@ function calcOcupationCompare() {
         backgroundColor: '#FF6384',
         borderWidth: 3,
         tension: 0.4,
-        pointRadius: 0,
+        pointRadius: 2,
         datalabels: {
           display: false
         }
@@ -357,7 +359,7 @@ function calcTriListings() {
   const dataPoints = [
     props.listingsTri2?.length || 0,
     props.listingsTri1?.length || 0,
-    props.listings?.length || 0
+    props.listings1?.length || 0
   ];
 
   return {
@@ -379,7 +381,7 @@ function calcTriListings() {
 
 function calcTriPrice() {
   const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
-  const triLists = [props.listingsTri2, props.listingsTri1, props.listings];
+  const triLists = [props.listingsTri2, props.listingsTri1, props.listings1];
 
   const averages = triLists.map(list => {
     let total = 0;
@@ -418,7 +420,7 @@ function calcTriPrice() {
 
 function calcTriOccupation() {
   const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
-  const triLists = [props.listingsTri2, props.listingsTri1, props.listings];
+  const triLists = [props.listingsTri2, props.listingsTri1, props.listings1];
 
   const averages = triLists.map(list => {
     let total = 0;
@@ -450,6 +452,59 @@ function calcTriOccupation() {
         tension: 0.4, 
         pointRadius: 4,
         pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+      }
+    ]
+  };
+}
+
+function calcListsPerHostMonth() {
+  const monthNames = [
+    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+  ];
+
+  const aggregateByMonth = (data) => {
+    const monthlyTotals = {};
+    for (let i = 1; i <= 12; i++) monthlyTotals[i] = 0;
+
+    data.forEach(item => {
+      const m = parseInt(item.month);
+      const days = parseInt(item.available_days);
+      if (!isNaN(m) && !isNaN(days)) {
+        monthlyTotals[m] += days;
+      }
+    });
+    return monthlyTotals;
+  };
+
+  const totals1 = aggregateByMonth(props.listings1);
+  const totals2 = aggregateByMonth(props.listings2);
+
+  // ordered 1 to 12
+  const dataPoints1 = Object.keys(totals1).map(m => totals1[m]);
+  const dataPoints2 = Object.keys(totals2).map(m => totals2[m]);
+
+  return {
+    labels: monthNames,
+    yAxisLabel: 'Nº de Listagens',
+    datasets: [
+      {
+        type: 'line',
+        data: dataPoints1,
+        borderColor: '#E3E7FF',
+        backgroundColor: '#E3E7FF',
+        borderWidth: 3,
+        tension: 0.4, 
+        pointRadius: 4,
+      },
+      {
+        type: 'line',
+        data: dataPoints2,
+        borderColor: '#AAE4E2',
+        backgroundColor: '#AAE4E2',
+        borderWidth: 3,
+        tension: 0.4, 
+        pointRadius: 4,
       }
     ]
   };
