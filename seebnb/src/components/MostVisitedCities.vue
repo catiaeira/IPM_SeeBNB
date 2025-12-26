@@ -3,7 +3,7 @@
         <h2 class="text">Cidades mais visitadas</h2>
         <div class="divider"></div>
         <div class="city-table">
-            <CityCard
+            <CityCard class="city-card"
                 v-for="city in cities"
                 :key="city.id"
                 :cityname="city.cityname"
@@ -46,6 +46,10 @@ const cities = [
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
+}
+
+.city-card {
+    height: 15rem;
 }
 
 .text {
