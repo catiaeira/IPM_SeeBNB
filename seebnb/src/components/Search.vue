@@ -1,0 +1,146 @@
+<template>
+  <div class="container">
+    <div class="search-tabs">
+      <div class="search" :class="{ selected: selected === 'search' }" @click="selectTab('search')">Pesquisar</div>
+      <div class="compare" :class="{ selected: selected === 'compare' }" @click="selectTab('compare')">Comparar</div>
+    </div>
+
+    <div class="search-bar">
+      <div class="top-half">
+        <div id="when-search" v-if="selected==='search'">
+          <input type="text"
+            v-model="locations.location"
+            placeholder="Localidade..."
+          />
+        </div>
+
+        <div id="when-compare" v-if="selected==='compare'">
+          <input type="text"
+            v-model="locations.location1"
+            placeholder="Localidade 1"
+          />
+          <input type="text"
+            v-model="locations.location2"
+            placeholder="Localidade 2"
+          />
+        </div>
+
+        <button class="search-btn" @click="submitSearch"><span class="magnifier">🔍︎</span></button>
+      </div>
+
+      <Filters v-model="filters" />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive, ref } from "vue"
+import Filters from './Filters/Filters.vue'
+
+const emit = defineEmits(['search'])
+
+const selected = ref('search')
+
+const locations = reactive({
+  location: '',
+  location1: '',
+  location2: ''
+})
+
+const filters = reactive({
+  private_room: false,
+  shared_room: false,
+  apt: false,
+  hotel: false,
+  priceMin: null,
+  priceMax: null,
+  rating: 0,
+  dateFrom: null,
+  dateTo: null,
+  short: false,
+  long: false
+})
+
+function submitSearch() {
+  emit('search', { ...filters, ...locations })
+}
+
+
+function selectTab(tab) {
+  console.log('Selected tab:', tab)
+  selected.value = tab
+}
+</script>
+
+
+<style scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+}
+
+.search-tabs {
+  display: flex;
+}
+
+.search,
+.compare {
+  border-radius: 12px 12px 0 0;
+  background-color: var(--primary);
+  padding: 0.5rem 1rem;
+  font-size: larger;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+}
+
+.selected {
+  background-color: var(--accent);
+}
+
+.search-bar {
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--accent);
+  border-radius: 0 12px 12px 12px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  width: auto;
+}
+
+.top-half {
+  display: flex;
+  gap: 1rem;
+}
+
+#when-compare {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+input{
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 180px;
+}
+
+.search-btn {
+  content: '🔍︎';
+  width: 2.2rem;
+  background: white;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.magnifier {
+  color: black;
+  font-size: 1.2rem;
+}
+</style>
