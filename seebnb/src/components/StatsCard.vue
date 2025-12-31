@@ -35,7 +35,7 @@
 
 <style>
     .stats-card {
-        background: #f6f8ff;
+        background: var(--blue);
         border-radius: 12px;
         padding: 1.5rem;
         display: grid;
@@ -57,8 +57,8 @@
         font-size: 30px;    
         display: inline-block;
         position: relative;
-        -webkit-text-stroke: 0.5px black;
-        color: #CBD2FF; /* var (--cor_fundo*/
+        -webkit-text-stroke: 0.5px var(--text);
+        color: var(--blue);
     }
 
     .stars-outer::before {
@@ -72,7 +72,7 @@
         white-space: nowrap;
         overflow: hidden;
         width: 0; 
-        color: #AAE4E2;  /*var(--cor_barra) */
+        color: var(--text);
     }
 
     .stars-inner::before {

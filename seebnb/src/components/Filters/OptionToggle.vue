@@ -38,7 +38,7 @@ function toggle() {
 }
 
 .box.checked {
-  background-color: var(--accent);
+  background-color: var(--seagreen);
 }
 
 .text {
@@ -47,5 +47,4 @@ function toggle() {
   font-weight: 550;
   transition: color 0.2s ease;
 }
-
 </style>

@@ -97,7 +97,7 @@
   align-items: center;
   gap: 10px;
   z-index: 10;
-  background-color: #AAE4E2;
+  background-color: var(--seagreen);
   border-radius: 0px 45px 0 0;
 }
 
@@ -126,8 +126,8 @@
 }
 
 .nav-btn.active {
-  box-shadow: 0px 2px 6px 2px #CBD2FF, /* var(--cor_fundo)*/
-              inset 0px 2px 6px 2px #CBD2FF; /* var(--cor_fundo)*/
+  box-shadow: 0px 2px 6px 2px var(--blue),
+              inset 0px 2px 6px 2px var(--blue);
 }
 
 .heatmap-legend {

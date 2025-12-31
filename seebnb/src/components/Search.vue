@@ -77,7 +77,6 @@ function selectTab(tab) {
 .container {
   display: flex;
   flex-direction: column;
-  width: auto;
 }
 
 .search-tabs {
@@ -87,7 +86,7 @@ function selectTab(tab) {
 .search,
 .compare {
   border-radius: 12px 12px 0 0;
-  background-color: var(--primary);
+  background-color: var(--light-blue);
   padding: 0.5rem 1rem;
   font-size: larger;
   font-weight: 600;
@@ -97,18 +96,18 @@ function selectTab(tab) {
 }
 
 .selected {
-  background-color: var(--accent);
+  background-color: var(--blue);
 }
 
 .search-bar {
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
-  background: var(--accent);
+  background: var(--blue);
   border-radius: 0 12px 12px 12px;
-  align-items: center;
   position: relative;
   z-index: 2;
-  width: auto;
 }
 
 .top-half {
@@ -118,11 +117,10 @@ function selectTab(tab) {
 
 #when-compare {
   display: flex;
-  flex-direction: row;
   gap: 1rem;
 }
 
-input{
+input {
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
   border: 1px solid #ddd;
@@ -130,10 +128,8 @@ input{
 }
 
 .search-btn {
-  content: '🔍︎';
   width: 2.2rem;
   background: white;
-  color: white;
   border: none;
   border-radius: 10px;
   cursor: pointer;
