@@ -8,10 +8,13 @@ export default function getFilterParams(filter) {
     if (filter.priceMin)     params.append('price_gte', filter.priceMin);
     if (filter.priceMax)     params.append('price_lte', filter.priceMax);
     
-    if (filter.short)        params.append('minimum_nights_lte', 20);
-    if (filter.long)         params.append('minimum_nights_gte', 20);
-
-    if (filter.rating > 0)   params.append('review_scores_rating_gte', filter.rating );
+    if (filter.short)        params.append('minimum_nights_lte', 30);
+    if (filter.long)         params.append('minimum_nights_gte', 30);
+    
+    console.log(filter.rating)
+    if (filter.rating){      params.append('review_scores_rating_gte', filter.rating[0]);
+                             params.append('review_scores_rating_lte', filter.rating[1]);
+    }   
 
     console.log (params)
     return params.toString();

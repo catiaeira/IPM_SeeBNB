@@ -389,10 +389,9 @@ function calcTriPrice() {
 
     list.forEach(l => {
       if (l.price) {
-        const cleanPrice = parseFloat(l.price.replace(/[$,]/g, ''));
-
-        if (!isNaN(cleanPrice) && cleanPrice !== null) {
-          total += cleanPrice;
+        
+        if (!isNaN(l.price) && l.price !== null) {
+          total += l.price;
           validCount++;
         }
       }

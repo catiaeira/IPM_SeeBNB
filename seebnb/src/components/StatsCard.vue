@@ -125,12 +125,9 @@
                         counts.rating++;
                     }
 
-                    if (l.price) {
-                        const cleanPrice = parseFloat(l.price.replace(/[$,]/g, ''));
-                        if (!isNaN(cleanPrice)) {
-                            totals.price += cleanPrice;
-                            counts.price++;
-                        }
+                    if (l.price && !isNaN(l.price)) {
+                        totals.price += l.price;
+                        counts.price++;
                     }
 
                     const nights = parseInt(l.estimated_occupancy_l365d);

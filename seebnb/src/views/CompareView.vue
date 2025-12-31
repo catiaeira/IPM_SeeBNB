@@ -59,7 +59,6 @@
             async fetchData() {
                 try {
                   const cities = [this.city1, this.city2];
-                  console.log (cities)
                     for (let i = 0; i<2; i++){
                         const city = cities[i];
                         console.log("Fetching data for:", city);
@@ -82,18 +81,26 @@
                         const city = cities[i];
                         console.log("Fetching calendar data for:", city);
                         let link = `http://localhost:3000/${city}.calendar`;
-                        const filter_str = getFilterParams (this.filters);
-                        const link_w_filter = filter_str ? link + '?' + filter_str : link
-                        
-                        const response = await fetch(link_w_filter);
-                        
+                        const response = await fetch(link);
                         if (!response.ok) throw new Error('Network response was not ok');
-                        
-                        const data = await response.json();
-                        if (i==0) this.calendar1 = data;
-                        else this.calendar2 = data;
 
-                        console.log(`Successfully loaded ${data.length} listings.`);
+                        const data = await response.json();
+                        
+                        if (i==0) {
+                          const availableIds = new Set(this.listings1.map(item =>  parseInt(item.id)));
+                          this.calendar1 = data.filter(listing => {
+                            return availableIds.has(listing.listing_id);
+                          });
+                          console.log(`Successfully loaded ${this.calendar1.length} listings.`);
+                        }
+                        else {
+                          const availableIds = new Set(this.listings2.map(item =>  parseInt(item.id)));
+                          this.calendar2 = data.filter(listing => {
+                            return availableIds.has(listing.listing_id);
+                          });
+                          console.log(`Successfully loaded ${this.calendar2.length} listings.`);  
+                        }
+                        
                     }
                   } catch (error) {
                       console.error("Fetch failed:", error);
@@ -127,7 +134,7 @@
     <div class="chart">
       <Chart
         :listings1= "calendar1"
-        :listings2="calendar2"
+        :listings2= "calendar2"
         mainLabel="listsPerMonths"
       />
     </div>
