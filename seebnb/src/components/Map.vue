@@ -452,7 +452,7 @@
           const data = this.allListings.map(item => {
             let weight = 0;
             if (mode === 'price') {
-              weight = item.price ? parseFloat(item.price.replace(/[$,]/g, '')) : 0;
+              weight = item.price ? item.price : 0;
             } else {
               weight = parseFloat(item[mode]);
             }

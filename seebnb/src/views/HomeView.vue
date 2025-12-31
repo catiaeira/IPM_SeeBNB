@@ -2,7 +2,7 @@
     <div class="page">
         <div class="top-half">
             <img src="https://images.unsplash.com/photo-1708474660686-7a00a0ffe4ac" class="city-image"/>
-            <Search class="search-wrapper"/>
+            <Search class="search-wrapper" @search="handleSearch"/>
         </div>
         <div class="table">
             <p class="text">Visualize o impacto do AirBNB em comunidades residenciais.</p>
@@ -14,6 +14,31 @@
 <script setup>
     import MostVisitedCities from '@/components/MostVisitedCities.vue';
     import Search from '@/components/Search.vue';
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
+    function handleSearch(search) {
+        const location = search.locations;
+        const filter = search.filters;
+        console.log(filter)
+
+        if (location.location) { // single city search
+            router.push({ 
+                name: 'City', 
+                params: { city: location.location },
+                query: {...filter}
+            });
+        } else {               // comparison search
+            router.push({ 
+                name: 'Compare', 
+                params: { 
+                    city1: location.location1, 
+                    city2: location.location2 
+                },
+                query: {...filter}
+            });
+        }
+    }
 </script>
 
 <style scoped>

@@ -28,7 +28,7 @@
         <button class="search-btn" @click="submitSearch"><span class="magnifier">🔍︎</span></button>
       </div>
 
-      <Filters v-model="filters" />
+      <Filters :filters="filters" />
     </div>
   </div>
 </template>
@@ -62,7 +62,7 @@ const filters = reactive({
 })
 
 function submitSearch() {
-  emit('search', { ...filters, ...locations })
+  emit('search', { filters, locations })
 }
 
 

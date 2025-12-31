@@ -10,10 +10,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', redirect: '/home' },
-    { path:'/home', component: HomeView },
-    { path:'/city', component: CityView },
-    { path: '/compare', component: CompareView },
-    { path: '/:notFound(.*)', component: NotFoundView }
+    { path:'/home', name: "Home", component: HomeView },
+    { path:'/city/:city', name: "City", component: CityView, props: true },
+    { path: '/compare/:city1/:city2', name: "Compare", component: CompareView, props: true },
+    { path: '/:notFound(.*)', name: "NotFound", component: NotFoundView }
   ],
 })
 
