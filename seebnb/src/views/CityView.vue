@@ -2,9 +2,10 @@
     import MapComponent from '@/components/Map.vue';
     import Chart from '@/components/BaseChart.vue';
     import StatsComponent from '@/components/StatsCard.vue';
+    import CityIntro from '@/components/CityIntro.vue';
 
     export default {
-        components : {MapComponent, Chart, StatsComponent},
+        components : {MapComponent, Chart, StatsComponent, CityIntro},
         data() {
             return {
             allListings: [],
@@ -67,7 +68,7 @@
 </script>
 <template>
   <div class="page">
-    <div class="cityName">{{ currentCity }}</div> 
+    <CityIntro :cityname="currentCity" color="var(--seagreen)"/>
 
     <div class="top">
 
@@ -118,17 +119,9 @@
 
 <style scoped>
 .page {
-  width: 90%;
-  margin: 0 auto;
-  padding: 2rem 0;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}
-.cityName {
-  -webkit-text-stroke: 1px rgb(255, 255, 255);
-  font-size: 30px;
-  font-weight: bolder;
 }
 
 .top {

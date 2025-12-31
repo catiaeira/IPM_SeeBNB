@@ -8,6 +8,7 @@ import Bottom from './components/Bottom.vue';
     <NavBar class="on-top" />
     <router-view class="content"/>
     <Bottom class="on-top"/>
+    <div class="empty"></div>
   </div>
 </template>
 
@@ -26,5 +27,9 @@ import Bottom from './components/Bottom.vue';
   width: 100%;
   margin: 0;
   padding: 0;
+}
+
+.empty {
+  height: 25px;
 }
 </style>
