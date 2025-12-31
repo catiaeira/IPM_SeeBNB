@@ -62,7 +62,7 @@ const filters = reactive({
 })
 
 function submitSearch() {
-  emit('search', { ...filters, ...locations })
+  emit('search', { filters, locations })
 }
 
 

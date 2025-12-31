@@ -145,7 +145,7 @@
                         counts.profit++;
                     }
 
-                    if (parseInt(l.minimum_nights) >= 30) {
+                    if (parseInt(l.minimum_nights) < 30) {
                         totals.shortRental += 1;
                     }
                 });

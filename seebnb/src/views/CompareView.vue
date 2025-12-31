@@ -1,6 +1,7 @@
 <script>
     import Chart from '@/components/BaseChart.vue';
-    import StatsComponent from '@/components/StatsCard.vue';
+    import StatsComponent from '@/components/StatsCard.vue';7
+    import getFilterParams from '@/utils/formatFilter.js';
 
     export default {
         components : {Chart, StatsComponent},
@@ -10,8 +11,45 @@
             listings2: [],
             calendar1: [],
             calendar2: [],
-            city1: 'lisbon',
-            city2: 'porto',
+            }
+        },
+        props: {
+            city1: String,
+            city2: String
+        },
+        computed: {
+          filters() {
+            return {
+              private_room: this.$route.query.private_room === 'true',
+              shared_room: this.$route.query.shared_room === 'true',
+              apt: this.$route.query.apt === 'true',
+              hotel: this.$route.query.hotel === 'true',
+              priceMin: this.$route.query.priceMin
+                ? Number(this.$route.query.priceMin)
+                : null,
+              priceMax: this.$route.query.priceMax
+                ? Number(this.$route.query.priceMax)
+                : null,
+              rating: this.$route.query.rating
+                ? Number(this.$route.query.rating)
+                : 0,
+              short: this.$route.query.short === 'true',
+              long: this.$route.query.long === 'true'
+            }
+          }
+        },
+        watch: {
+            '$route.query': {
+                handler: 'fetchData',
+                deep: true
+            },
+            city1: {
+                handler: 'fetchData',
+                immediate: false
+            },
+            city2: {
+                handler: 'fetchData',
+                immediate: false
             }
         },
         async created() {
@@ -21,11 +59,16 @@
             async fetchData() {
                 try {
                   const cities = [this.city1, this.city2];
+                  console.log (cities)
                     for (let i = 0; i<2; i++){
                         const city = cities[i];
                         console.log("Fetching data for:", city);
                         let link = `http://localhost:3000/${city}.listings`;
-                        const response = await fetch(link);
+                        const filter_str = getFilterParams (this.filters);
+                        const link_w_filter = filter_str ? link + '?' + filter_str : link;
+                        
+                        console.log("link with filter :", link_w_filter);
+                        const response = await fetch(link_w_filter);
                         
                         if (!response.ok) throw new Error('Network response was not ok');
                         
@@ -39,7 +82,10 @@
                         const city = cities[i];
                         console.log("Fetching calendar data for:", city);
                         let link = `http://localhost:3000/${city}.calendar`;
-                        const response = await fetch(link);
+                        const filter_str = getFilterParams (this.filters);
+                        const link_w_filter = filter_str ? link + '?' + filter_str : link
+                        
+                        const response = await fetch(link_w_filter);
                         
                         if (!response.ok) throw new Error('Network response was not ok');
                         
