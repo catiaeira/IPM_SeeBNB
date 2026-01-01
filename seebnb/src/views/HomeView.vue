@@ -6,7 +6,7 @@
                 `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0), var(--background)),
                 url(${ImageDict.cityscape})` }">
                 
-                <Search class="search-wrapper"/>
+                <Search class="search-wrapper" @search="handleSearch"/>
             </div>
         </div>
         <div class="table">
@@ -20,6 +20,31 @@
     import MostVisitedCities from '@/components/MostVisitedCities.vue';
     import Search from '@/components/Search.vue';
     import ImageDict from '@/assets/ImageDict';
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter();
+    function handleSearch(search) {
+        const location = search.locations;
+        const filter = search.filters;
+        console.log(filter)
+
+        if (location.location) { // single city search
+            router.push({ 
+                name: 'City', 
+                params: { city: location.location },
+                query: {...filter}
+            });
+        } else {               // comparison search
+            router.push({ 
+                name: 'Compare', 
+                params: { 
+                    city1: location.location1, 
+                    city2: location.location2 
+                },
+                query: {...filter}
+            });
+        }
+    }
 </script>
 
 <style scoped>

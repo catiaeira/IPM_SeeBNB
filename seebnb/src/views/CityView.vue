@@ -3,6 +3,7 @@
     import Chart from '@/components/BaseChart.vue';
     import StatsComponent from '@/components/StatsCard.vue';
     import CityIntro from '@/components/CityIntro.vue';
+    import getFilterParams from '@/utils/formatFilter.js';
 
     export default {
         components : {MapComponent, Chart, StatsComponent, CityIntro},
@@ -11,24 +12,62 @@
             allListings: [],
             listingsTri1:[],
             listingsTri2:[],
-            currentCity: 'lisbon',
             triStates: ['Listagens', 'Preço', 'Ocupação'],
             trimestralState: 0 // listings = 0, price, occupation
             }
         },
+        props: {
+          city: String,
+        },
+        computed: {
+          filters() {
+            return {
+              private_room: this.$route.query.private_room === 'true',
+              shared_room: this.$route.query.shared_room === 'true',
+              apt: this.$route.query.apt === 'true',
+              hotel: this.$route.query.hotel === 'true',
+              priceMin: this.$route.query.priceMin
+                ? Number(this.$route.query.priceMin)
+                : null,
+              priceMax: this.$route.query.priceMax
+                ? Number(this.$route.query.priceMax)
+                : null,
+              rating: this.$route.query.rating
+                ? Number(this.$route.query.rating)
+                : 0,
+              short: this.$route.query.short === 'true',
+              long: this.$route.query.long === 'true'
+            }
+          }
+        },
         async created() {
             await this.fetchData();
         },
+        watch: {
+            '$route.query': {
+                handler: 'fetchData',
+                deep: true
+            },
+            city: {
+                handler: 'fetchData',
+                immediate: false
+            }
+        },
         methods: {    
             async fetchData() {
+                if (!this.city) return;
                 try {
-                    console.log("Fetching data for:", this.currentCity);
-                    for (let i = 0; i<3; i++){
-                      let link = `http://localhost:3000/${this.currentCity}.listings`;
-                      if (i>0) link = link.concat (`(${i})`);
+                    console.log("Fetching data for:", this.city);
+                    console.log ("Filters: ", this.filters)
 
-                      const response = await fetch(link);
+                    for (let i = 0; i<3; i++){
+                      let link = `http://localhost:3000/${this.city}.listings`;
+                      if (i>0) link = link.concat (`(${i})`);
+                      const filter_str = getFilterParams (this.filters);
+                      const link_w_filter = filter_str ? link + '?' + filter_str : link
                       
+                      console.log("link with filter :", link_w_filter);
+                      const response = await fetch(link_w_filter);
                       if (!response.ok) throw new Error('Network response was not ok');
                       
                       const data = await response.json();
@@ -46,7 +85,12 @@
                         default:
                           break;
                       }                      
-                      console.log(`Successfully loaded ${this.allListings.length} listings.`);
+                      const target =
+                        i === 0 ? this.allListings :
+                        i === 1 ? this.listingsTri1 :
+                                  this.listingsTri2;
+
+                      console.log(`Successfully loaded ${target.length} listings.`);
                     }
                   } catch (error) {
                       console.error("Fetch failed:", error);
@@ -81,7 +125,7 @@
       <div class="map-card">
         <MapComponent
           :listings="allListings"
-          :cityName="currentCity"
+          :cityName="city"
         />
       </div>
     </div>

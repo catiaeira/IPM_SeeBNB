@@ -37,21 +37,11 @@
 </template>
 
 <script setup>
-import { reactive } from "vue"
 import DoubleSlider from "./DoubleSlider.vue"
 import OptionToggle from "./OptionToggle.vue";
 
-const filters = reactive({
-  private_room: false,
-  shared_room: false,
-  apt: false,
-  hotel: false,
-  priceMin: null,
-  priceMax: null,
-  rating: 0,
-  short: false,
-  long: false,
-})
+const props = defineProps({ filters: Object })
+const filters = props.filters
 </script>
 
 <style scoped>

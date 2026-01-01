@@ -23,7 +23,7 @@
           </li>
           <li class="stat-row">
             <span>Nº de alojamentos locais</span>
-            <span>{{ new Intl.NumberFormat('pt-PT').format(allListings.length) }}</span>
+            <span>{{ listingsNumber }}</span>
           </li>
           <li class="stat-row">
             <span>Percentagem de short-rentals</span>
@@ -88,6 +88,7 @@
                 averagePrice: 0,
                 averageRentedNights: 0,
                 averageProfit: 0,
+                listingsNumber: 0,
                 shortRentalPercentage: 0,
             }
         },
@@ -125,12 +126,9 @@
                         counts.rating++;
                     }
 
-                    if (l.price) {
-                        const cleanPrice = parseFloat(l.price.replace(/[$,]/g, ''));
-                        if (!isNaN(cleanPrice)) {
-                            totals.price += cleanPrice;
-                            counts.price++;
-                        }
+                    if (l.price && !isNaN(l.price)) {
+                        totals.price += l.price;
+                        counts.price++;
                     }
 
                     const nights = parseInt(l.estimated_occupancy_l365d);
@@ -145,20 +143,31 @@
                         counts.profit++;
                     }
 
-                    if (parseInt(l.minimum_nights) >= 30) {
+                    if (parseInt(l.minimum_nights) < 30) {
                         totals.shortRental += 1;
                     }
                 });
 
                 const getAvg = (total, count) => (count > 0 ? (total / count) : 0);
+                const profit = getAvg(totals.profit, counts.profit)
 
                 this.averageRating = getAvg(totals.rating, counts.rating).toFixed(2);
                 this.averagePrice = getAvg(totals.price, counts.price).toFixed(2);
                 this.averageRentedNights = Math.round(getAvg(totals.nights, counts.nights));
-                this.averageProfit = new Intl.NumberFormat('pt-PT').format(getAvg(totals.profit, counts.profit).toFixed(2));
+                this.averageProfit = new Intl.NumberFormat('pt-PT').format(profit.toFixed(2));
                 this.shortRentalPercentage = listings.length > 0 
                     ? ((totals.shortRental / listings.length) * 100).toFixed(2) 
                     : 0;
+                this.listingsNumber = new Intl.NumberFormat('pt-PT').format(this.allListings.length);
+
+                this.$emit('stats', {
+                    price:  this.averagePrice,
+                    rating: this.averageRating,
+                    nights: this.averageRentedNights,
+                    profit: profit,
+                    numListings: this.listingsNumber,
+                    shortRental: this.shortRentalPercentage
+                });
             }
         }
     }
