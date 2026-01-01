@@ -62,7 +62,12 @@ const filters = reactive({
 })
 
 function submitSearch() {
-  emit('search', { filters, locations })
+  let locations_lower = {
+    location: locations.location.toLowerCase(),
+    location1: locations.location1.toLowerCase(),
+    location2: locations.location2.toLowerCase(),
+  }
+  emit('search', { filters, locations: locations_lower })
 }
 
 

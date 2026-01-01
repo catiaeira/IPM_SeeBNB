@@ -58,7 +58,6 @@
                 if (!this.city) return;
                 try {
                     console.log("Fetching data for:", this.city);
-                    console.log ("Filters: ", this.filters)
 
                     for (let i = 0; i<3; i++){
                       let link = `http://localhost:3000/${this.city}.listings`;
@@ -66,11 +65,17 @@
                       const filter_str = getFilterParams (this.filters);
                       const link_w_filter = filter_str ? link + '?' + filter_str : link
                       
-                      console.log("link with filter :", link_w_filter);
                       const response = await fetch(link_w_filter);
-                      if (!response.ok) throw new Error('Network response was not ok');
+                      let data = null;
+                      if (response.ok) data = await response.json();
                       
-                      const data = await response.json();
+                      if (!response.ok || data.length == 0) {
+                        this.$router.push({ 
+                          name: 'NotFound',
+                          params: { notFound: 'data-not-found' }
+                        });
+                        return;
+                      }
                       
                       switch (i) {
                         case 0:

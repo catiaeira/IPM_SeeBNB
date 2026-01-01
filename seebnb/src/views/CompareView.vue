@@ -70,10 +70,16 @@
                         const link_w_filter = filter_str ? link + '?' + filter_str : link;
                         
                         const response = await fetch(link_w_filter);
+                        let data = null;
+                        if (response.ok) data = await response.json();
                         
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        
-                        const data = await response.json();
+                        if (!response.ok || data.length == 0) {
+                          this.$router.push({ 
+                            name: 'NotFound',
+                            params: { notFound: 'data-not-found' }
+                          });
+                          return;
+                        }
                         if (i==0) this.listings1 = data;
                         else this.listings2 = data;
 
