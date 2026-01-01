@@ -11,6 +11,9 @@
             listings2: [],
             calendar1: [],
             calendar2: [],
+
+            stats1: null,
+            stats2: null
             }
         },
         props: {
@@ -66,7 +69,6 @@
                         const filter_str = getFilterParams (this.filters);
                         const link_w_filter = filter_str ? link + '?' + filter_str : link;
                         
-                        console.log("link with filter :", link_w_filter);
                         const response = await fetch(link_w_filter);
                         
                         if (!response.ok) throw new Error('Network response was not ok');
@@ -121,12 +123,34 @@
       <div class="stats">
         <StatsComponent
           :allListings="listings1"
+          @stats="s => stats1 = s"
           />
       </div>
+      <ul class="arrows">
+        <li :class="stats1 && stats2 && stats1.rating > stats2.rating ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+        <li :class="stats1 && stats2 && stats1.price > stats2.price ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+        <li :class="stats1 && stats2 && stats1.nights > stats2.nights ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+        <li :class="stats1 && stats2 && stats1.profit > stats2.profit ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+        <li :class="stats1 && stats2 && stats1.numListings > stats2.numListings ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+        <li :class="stats1 && stats2 && stats1.shortRental > stats2.shortRental ? 'point-left' : 'point-right'">
+          <!--<img src="/arrow.svg" />-->->
+        </li>
+      </ul>
 
       <div class="stats">
         <StatsComponent
           :allListings="listings2"
+          @stats="s => stats2 = s"
           />
       </div>
     </div>
@@ -172,31 +196,32 @@
 
 .top {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr auto 1fr;
   gap: 2rem;
   align-items: stretch;
 }
 
-.map-card {
-  align-self: center;
-  height: 90%;
-  background: #e9f4f3;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  min-height: 360px;
-}
-
-.trimestral-data {
+.stats {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  align-self: center;
-  gap: 2rem; 
+  flex-direction: column;
 }
 
-.trimestral-chart {
-  border-radius: 12px;
+.arrows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  justify-content: space-between;
+  transform: translateX(-25%);
+}
+.point-left {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+.point-right {
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
 }
 
 .chart {
