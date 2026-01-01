@@ -1,8 +1,13 @@
 <template>
     <div class="page">
         <div class="top-half">
-            <img src="https://images.unsplash.com/photo-1708474660686-7a00a0ffe4ac" class="city-image"/>
-            <Search class="search-wrapper" @search="handleSearch"/>
+            <div class="background"
+                :style="{backgroundImage:
+                `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0), var(--background)),
+                url(${ImageDict.cityscape})` }">
+                
+                <Search class="search-wrapper" @search="handleSearch"/>
+            </div>
         </div>
         <div class="table">
             <p class="text">Visualize o impacto do AirBNB em comunidades residenciais.</p>
@@ -14,6 +19,7 @@
 <script setup>
     import MostVisitedCities from '@/components/MostVisitedCities.vue';
     import Search from '@/components/Search.vue';
+    import ImageDict from '@/assets/ImageDict';
     import { useRouter } from 'vue-router';
 
     const router = useRouter();
@@ -52,6 +58,8 @@
 .top-half {
     position: relative;
     width: 100%;
+    height: 60vh;
+    overflow: hidden;
 }
 
 .search-wrapper {
@@ -63,10 +71,13 @@
     z-index: 10;
 }
 
-.city-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.background {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .table {

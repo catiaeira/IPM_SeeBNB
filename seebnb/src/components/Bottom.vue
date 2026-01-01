@@ -17,7 +17,7 @@
   height: 2em;
   text-align: center;
   border-radius: 0px 45px;
-  background-color: var(--accent);
+  background-color: var(--seagreen);
   font-size: 0.7rem;
   color: var(--text);
 }

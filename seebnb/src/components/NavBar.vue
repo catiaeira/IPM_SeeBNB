@@ -3,7 +3,7 @@
     <!-- Left: -->
     <div class="left-side">
       <router-link to="/home" class="home-link">SeeBNB</router-link>
-      <img :src="logo" width="50px"/>
+      <img :src="ImageDict.logo" width="50px"/>
     </div>
     
 
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-  import logo from '@/assets/seebnblogo.svg'
+  import ImageDict from '@/assets/ImageDict';
   import ThemeToggle from './ThemeToggle.vue';
 </script>
 
@@ -32,7 +32,7 @@
   text-align: center;
   padding: 1%;
   border-radius: 0px 45px;
-  background-color: var(--accent);
+  background-color: var(--seagreen);
   font-size: 1rem;
   z-index: 500;
 }

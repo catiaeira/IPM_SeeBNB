@@ -86,27 +86,28 @@ onBeforeUnmount(() => stopDrag(() => {}, () => {}));
 </script>
 
 <style scoped>
-.slider { 
+.slider {
   position: relative;
-  height: 10px;
   width: 12rem;
-  border-radius: 5px;
+  height: 10px;
   margin: 1rem;
+  border-radius: 5px;
 }
 
-.track {
+.track,
+.range {
   position: absolute;
   inset: 0;
   border-radius: 5px;
-  background: var(--accent);
+}
+
+.track {
+  background: white;
 }
 
 .range {
-  position: absolute;
-  height: 100%;
-  border-radius: 5px;
+  background: var(--seagreen);
   border: 2px solid white;
-  background: var(--accent);
 }
 
 .thumb {
@@ -115,24 +116,24 @@ onBeforeUnmount(() => stopDrag(() => {}, () => {}));
   transform: translate(-50%, -50%);
   width: 22px;
   height: 22px;
-  border: 2px solid white;
   border-radius: 50%;
+  background: var(--seagreen);
+  border: 2px solid white;
   cursor: pointer;
-  background: var(--accent);
 }
 
-.label { 
+.label {
   position: absolute;
   top: -38px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
-  color: var(--text);
   padding: 4px 9px;
   font-size: 13px;
+  font-weight: 600;
+  background: var(--seagreen);
   border: 1px solid white;
   border-radius: 6px;
-  font-weight: 600;
+  color: var(--text);
   white-space: nowrap;
 }
 </style>

@@ -27,13 +27,6 @@
         <DoubleSlider v-model="filters.rating" />
       </div>
     </div>
-    
-    <!-- Dates -->
-    <div class="dates">
-      <span class="text">Disponível</span>
-      <label class="text">De <input type="date" v-model="filters.dateFrom" class="date-input" /></label>
-      <label class="text">Até <input type="date" v-model="filters.dateTo" class="date-input" /></label>
-    </div>
 
     <!-- Durations -->
     <div class="column">
@@ -56,46 +49,37 @@ const filters = props.filters
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
-  background: var(--accent);
+  padding: 1rem;
+  background: var(--blue);
   border-radius: 18px;
-  width: auto;
-  gap: 30px;
+  gap: 2rem;
 }
 
 .column {
   display: flex;
   flex-direction: column;
-  width: auto;
-  gap: 5px;
+  gap: 0.4rem;
 }
 
 .price,
 .rating {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.6rem;
 }
 
 .dates {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.date-input {
-  padding: 4px 6px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: white;
+  gap: 0.3rem;
 }
 
 .input {
-  width: 60px;
   padding: 4px 6px;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 6px;
   background: white;
+  width: 60px;
 }
 
 .text {
@@ -103,4 +87,5 @@ const filters = props.filters
   font-size: 1.2rem;
   font-weight: 550;
 }
+
 </style>
