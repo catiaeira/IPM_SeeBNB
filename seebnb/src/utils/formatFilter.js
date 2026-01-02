@@ -15,6 +15,5 @@ export default function getFilterParams(filter) {
                              params.append('review_scores_rating_lte', filter.rating[1]);
     }   
 
-    console.log (params)
     return params.toString();
 }

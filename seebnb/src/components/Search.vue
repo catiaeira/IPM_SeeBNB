@@ -36,6 +36,7 @@
 <script setup>
 import { reactive, ref } from "vue"
 import Filters from './Filters/Filters.vue'
+import { normalizeCityName } from "@/utils/CityTranslation"
 
 const emit = defineEmits(['search'])
 
@@ -62,12 +63,12 @@ const filters = reactive({
 })
 
 function submitSearch() {
-  let locations_lower = {
-    location: locations.location.toLowerCase(),
-    location1: locations.location1.toLowerCase(),
-    location2: locations.location2.toLowerCase(),
+  let locations_normalized = {
+    location: normalizeCityName(locations.location),
+    location1: normalizeCityName(locations.location1),
+    location2: normalizeCityName(locations.location2),
   }
-  emit('search', { filters, locations: locations_lower })
+  emit('search', { filters, locations: locations_normalized })
 }
 
 
