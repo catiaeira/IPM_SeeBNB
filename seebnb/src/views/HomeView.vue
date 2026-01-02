@@ -40,10 +40,15 @@
 
         if (location) {
             if (await dataExists(location, filter)) {
-                router.push({ name: 'City', params: { city: location }, query: { ...filter } });
+                router.push({ name: 'City', params: { city: location }, 
+                query: {...Object.fromEntries(
+                    Object.entries(filter).filter(
+                        ([, v]) => v !== null && v !== false && v !== 0
+                    )
+                    )
+                }});
             } else {
                 alert("no data for that city / filter too specific");
-
             }
         } else if (location1 && location2) {
             const [exists1, exists2] = await Promise.all([dataExists(location1, filter), dataExists(location2, filter)]);
@@ -52,8 +57,11 @@
                 router.push({ 
                     name: 'Compare', 
                     params: { city1: location1, city2: location2 }, 
-                    query: { ...filter } 
-                });
+                    query: {...Object.fromEntries(
+                        Object.entries(filter).filter(
+                            ([, v]) => v !== null && v !== false && v !== 0
+                    ))
+                }});
             } else {
                 alert("no data for those cities / filter too specific");
             }

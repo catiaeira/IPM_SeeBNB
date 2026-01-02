@@ -56,8 +56,6 @@ const filters = reactive({
   priceMin: null,
   priceMax: null,
   rating: 0,
-  dateFrom: null,
-  dateTo: null,
   short: false,
   long: false
 })
