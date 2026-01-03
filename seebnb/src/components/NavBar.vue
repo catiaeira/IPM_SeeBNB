@@ -9,14 +9,23 @@
 
     <!-- Right: -->
     <div class="right-side">
+      <Export v-if="notOnHome"></Export>
       <ThemeToggle></ThemeToggle>
     </div>
   </nav>
 </template>
 
 <script setup>
-  import ImageDict from '@/assets/ImageDict';
-  import ThemeToggle from './ThemeToggle.vue';
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+import ImageDict from '@/assets/ImageDict'
+import ThemeToggle from './ThemeToggle.vue'
+import Export from './Export.vue'
+
+const route = useRoute()
+
+const notOnHome = computed(() => route.path !== '/home')
 </script>
 
 <style scoped>
@@ -62,5 +71,6 @@
   display: flex;
   align-items: center;
   height: 20px;
+  gap: 0.5rem;
 }
 </style>

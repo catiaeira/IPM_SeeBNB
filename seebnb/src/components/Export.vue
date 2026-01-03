@@ -1,0 +1,298 @@
+<template>
+  <!-- button -->
+    <img
+        :src="shareIcon"
+        @click="openPopup"
+        width="20px"
+        class="share-button"
+    />
+
+  <!-- backdrop -->
+  <div
+    v-if="state !== 'button'"
+    class="backdrop"
+    @click="closePopup"
+  ></div>
+
+  <!-- popup -->
+  <div v-if="state !== 'button'" id="popup" @click.stop>
+    <div class="content">
+        <img :src="ImageDict.shareDark"
+            @click="openPopup"
+            width="70px"
+        />
+
+        <div class="share">
+            <span class="text">Partilhar página:</span>
+            <div class="buttons">
+
+              <!-- facebook -->
+              <!-- a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by IconsBox - Flaticon</a -->
+              <svg id="facebook" class="icon" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512.000000 512.000000" fill="currentColor"
+                preserveAspectRatio="xMidYMid meet">
+                
+                <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                  <path d="M805 4748 c-89 -16 -204 -80 -278 -153 -77 -76 -138 -190 -156 -289
+                  -15 -83 -15 -3409 0 -3492 18 -99 79 -213 156 -289 76 -76 190 -137 287 -154
+                  39 -7 344 -11 888 -11 l828 0 0 915 0 915 -185 0 -185 0 0 365 0 365 179 0
+                  178 0 6 233 c6 247 16 316 63 435 80 203 231 337 454 403 70 21 97 23 448 27
+                  l372 4 0 -316 0 -316 -227 0 c-251 0 -274 -5 -317 -63 -19 -26 -21 -45 -24
+                  -218 l-3 -189 291 0 291 0 -5 -42 c-4 -24 -17 -173 -31 -333 -14 -159 -28
+                  -305 -31 -322 l-5 -33 -269 0 -270 0 0 -915 0 -915 493 0 c306 0 516 4 553 11
+                  99 18 213 79 289 156 76 76 137 190 154 287 15 83 15 3409 0 3492 -38 213
+                  -230 405 -443 443 -77 14 -3428 13 -3501 -1z"/>
+                </g>
+              </svg>
+
+              <!-- instagram -->
+              <!-- a href="https://www.flaticon.com/free-icons/brand" title="brand icons">Brand icons created by Flat Icons Design - Flaticon</a -->
+              <svg id="instagram" class="icon" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512.000000 512.000000" fill="currentColor"
+                preserveAspectRatio="xMidYMid meet">
+
+                <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                  <path d="M1186 4674 c-351 -76 -626 -336 -728 -690 l-23 -79 0 -1345 0 -1345
+                  23 -80 c95 -332 344 -580 678 -677 l79 -23 1350 0 1350 0 88 28 c170 53 304
+                  135 421 257 117 123 190 250 238 416 l23 79 0 1345 0 1345 -23 79 c-95 330
+                  -331 571 -659 673 l-88 28 -1330 2 c-1144 1 -1340 0 -1399 -13z m2913 -428
+                  c48 -25 99 -75 128 -124 21 -35 27 -62 31 -123 4 -74 2 -84 -27 -144 -66 -133
+                  -205 -192 -351 -149 -73 22 -159 107 -185 183 -46 140 30 311 160 361 76 30
+                  181 28 244 -4z m-1330 -322 c116 -17 303 -75 402 -125 384 -192 652 -541 745
+                  -969 26 -120 26 -420 0 -540 -121 -557 -530 -965 -1086 -1086 -107 -23 -408
+                  -26 -515 -5 -321 63 -613 234 -814 477 -213 257 -321 555 -321 884 0 702 520
+                  1285 1225 1373 78 10 268 5 364 -9z"/>
+                  <path d="M2393 3324 c-87 -19 -200 -67 -270 -116 -419 -290 -462 -884 -90
+                  -1224 151 -137 322 -204 527 -204 221 0 391 72 550 230 89 89 135 157 177 260
+                  71 177 71 403 0 580 -98 240 -314 422 -567 475 -87 18 -243 18 -327 -1z"/>
+                </g>
+              </svg>
+
+              <!-- twitter -->
+              <!-- a href="https://www.flaticon.com/free-icons/tweet" title="tweet icons">Tweet icons created by Freepik - Flaticon</a -->
+              <svg id="twitter" class="icon" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512.000000 512.000000" fill="currentColor"
+                preserveAspectRatio="xMidYMid meet">
+                  
+                  <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                      <path d="M412 5100 c-97 -26 -173 -70 -248 -144 -75 -76 -119 -151 -144 -252
+                      -20 -76 -20 -115 -20 -2144 0 -2029 0 -2068 20 -2144 25 -101 69 -176 144
+                      -252 76 -75 151 -119 252 -144 76 -20 115 -20 2144 -20 2029 0 2068 0 2144 20
+                      101 25 176 69 252 144 75 76 119 151 144 252 20 76 20 115 20 2144 0 2029 0
+                      2068 -20 2144 -26 103 -69 177 -149 256 -79 77 -142 114 -247 140 -76 20 -117
+                      20 -2148 19 -2010 0 -2073 -1 -2144 -19z m1890 -1407 c244 -356 448 -648 454
+                      -649 5 -1 252 281 549 627 297 346 549 639 561 650 19 18 33 19 169 17 l148
+                      -3 -628 -730 c-345 -401 -635 -739 -645 -750 -18 -20 -5 -40 686 -1045 387
+                      -564 704 -1026 704 -1027 0 -2 -233 -3 -518 -3 l-518 0 -473 690 c-261 379
+                      -477 688 -480 685 -4 -2 -272 -312 -596 -689 l-590 -686 -153 0 -154 0 40 48
+                      c22 26 328 382 680 790 l640 744 -586 851 c-321 469 -627 914 -679 990 l-94
+                      137 519 0 520 0 444 -647z"/>
+                      <path d="M1252 4088 c44 -67 2142 -3065 2152 -3076 9 -9 67 -12 244 -10 l231
+                      3 -1083 1550 -1084 1550 -237 3 -238 2 15 -22z"/>
+                  </g>
+              </svg>
+
+              <!-- linkedin -->
+              <!-- a href="https://www.flaticon.com/free-icons/linkedin" title="linkedin icons">Linkedin icons created by Dave Gandy - Flaticon</a -->
+              <svg id="linkedin" class="icon" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512.000000 512.000000" fill="currentColor"
+                preserveAspectRatio="xMidYMid meet">
+                  
+                  <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                      <path d="M807 5109 c-304 -45 -588 -262 -722 -553 -19 -40 -44 -110 -57 -157
+                      l-23 -84 0 -1755 0 -1755 23 -84 c92 -338 354 -600 692 -693 l85 -23 1750 0
+                      1750 0 88 22 c339 87 613 361 700 700 l22 88 0 1745 0 1745 -22 88 c-45 175
+                      -138 332 -271 459 -125 119 -255 194 -417 240 l-80 23 -1730 1 c-952 1 -1756
+                      -2 -1788 -7z m474 -859 c217 -40 359 -241 322 -455 -15 -88 -47 -150 -108
+                      -211 -60 -61 -111 -89 -197 -109 -270 -64 -506 75 -549 324 -21 120 23 255
+                      110 339 106 102 259 142 422 112z m2329 -1064 c207 -34 375 -127 499 -275 92
+                      -112 150 -240 193 -429 21 -95 22 -117 25 -874 l4 -778 -385 0 -386 0 0 664
+                      c0 731 -3 782 -60 901 -37 78 -89 131 -159 164 -50 23 -68 26 -166 26 -100 0
+                      -116 -3 -172 -29 -74 -34 -167 -126 -207 -203 -14 -29 -30 -83 -36 -120 -5
+                      -39 -10 -353 -10 -736 l0 -667 -382 2 -383 3 3 1155 3 1155 380 3 379 2 0
+                      -162 1 -163 26 35 c15 19 65 73 112 120 185 183 431 254 721 206z m-2050
+                      -1196 l0 -1160 -385 0 -385 0 0 1160 0 1160 385 0 385 0 0 -1160z"/>
+                  </g>
+              </svg>
+
+              <!-- whatsapp -->
+              <!-- a href="https://www.flaticon.com/free-icons/whatsapp" title="whatsapp icons">Whatsapp icons created by Pixel perfect - Flaticon</a -->
+              <svg id="whatsapp" class="icon" version="1.0" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512.000000 512.000000" fill="currentColor"
+                preserveAspectRatio="xMidYMid meet">
+              
+                  <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)">
+                      <path d="M2405 5114 c-16 -2 -73 -9 -125 -15 -840 -94 -1611 -626 -1990 -1374
+                      -361 -710 -356 -1572 12 -2297 l59 -117 -180 -653 c-99 -359 -179 -654 -178
+                      -655 2 -1 305 77 675 174 l672 175 93 -45 c266 -129 544 -212 832 -248 146
+                      -18 455 -15 605 5 937 126 1727 733 2064 1586 122 310 171 578 171 935 -1 238
+                      -12 349 -56 550 -91 416 -312 843 -593 1142 -40 43 -77 85 -82 95 -13 24 -155
+                      149 -259 228 -193 147 -446 286 -670 368 -131 48 -359 105 -505 127 -99 15
+                      -480 28 -545 19z m415 -429 c628 -75 1169 -407 1522 -934 361 -540 449 -1241
+                      233 -1861 -250 -715 -886 -1245 -1655 -1381 -148 -26 -410 -36 -559 -20 -297
+                      31 -572 119 -842 271 l-106 59 -397 -103 c-224 -58 -396 -98 -396 -92 0 6 47
+                      181 105 389 l104 378 -43 67 c-434 672 -443 1523 -24 2221 168 278 429 543
+                      703 711 94 58 312 161 409 194 151 51 362 96 511 109 103 9 331 5 435 -8z"/>
+                      <path d="M1575 3741 c-82 -37 -202 -198 -258 -344 -30 -79 -32 -88 -32 -237 0
+                      -150 1 -158 33 -250 61 -175 157 -336 326 -544 435 -538 718 -743 1296 -937
+                      274 -92 499 -68 710 76 133 90 185 179 209 358 14 99 6 134 -38 163 -20 13
+                      -52 27 -71 31 -19 3 -114 44 -210 91 -219 105 -261 122 -310 122 -38 0 -42 -4
+                      -133 -117 -158 -198 -168 -208 -214 -207 -53 2 -267 105 -392 189 -211 141
+                      -412 356 -531 568 -40 72 -37 87 40 176 72 83 136 182 145 221 9 41 -215 581
+                      -261 628 l-32 32 -118 0 c-94 0 -128 -4 -159 -19z"/>
+                  </g>
+              </svg>
+
+            </div>
+        </div>
+
+        <div class="download">
+            <span class="text">Baixar dados:</span>
+            <div class="buttons">
+              <button class="button">PNG</button>
+              <button class="button">CSV</button>
+              <button class="button">JSON</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import ImageDict from '@/assets/ImageDict'
+
+const theme = ref('light')
+
+const updateTheme = () => {
+  theme.value =
+    document.documentElement.getAttribute('theme') || 'light'
+}
+
+onMounted(() => {
+  updateTheme()
+
+  const observer = new MutationObserver(updateTheme)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['theme']
+  })
+
+  onUnmounted(() => observer.disconnect())
+})
+
+const shareIcon = computed(() =>
+  theme.value === 'dark'
+    ? ImageDict.shareDark
+    : ImageDict.shareLight
+)
+
+const state = ref('button')
+
+const openPopup = () => {
+  state.value = 'popup'
+}
+
+const closePopup = () => {
+  state.value = 'button'
+}
+</script>
+
+
+<style scoped>
+#popup {
+    position: fixed;
+    top: 25%;
+    left: 25%;
+    z-index: 15;
+    background-color: #E3E7FF;
+    border-radius: 50px;
+    width: 50vw;
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: inherit;
+    height: inherit;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10; 
+}
+
+.share, .download {
+  width: inherit;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.share-button {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.button {
+  height: 50px;
+  width: 80px;
+  border: none;
+  border-radius: 20px;
+  background-color: black;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.1s ease, transform 0.1s ease;
+}
+
+.button:hover { background-color: var(--seagreen); }
+
+.button:active { transform: scale(0.90); }
+
+.icon {
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+}
+
+svg { fill: black; }
+svg:active { transform: scale(0.90); }
+
+#facebook, #instagram { scale: 1.2; }
+
+#facebook:hover { fill: #1877F2; }
+#facebook:active { fill: #4267B2; }
+
+#instagram:hover { fill: #E1306C; }
+#instagram:active { fill: #C13584; }
+
+#twitter:hover { fill: #838383; }
+#twitter:active { fill: #4B4B4B; }
+
+#linkedin:hover { fill: #0077B5; }
+#linkedin:active { fill: #064687; }
+
+#whatsapp:hover { fill: #25D366; }
+#whatsapp:active { fill: #075E54; }
+
+.text {
+  color: black;
+  font-size: 1.7rem;
+  font-weight: 500;
+}
+</style>
