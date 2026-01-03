@@ -39,9 +39,17 @@
 <script setup>
 import DoubleSlider from "./DoubleSlider.vue"
 import OptionToggle from "./OptionToggle.vue";
+import { watch } from "vue";
 
 const props = defineProps({ filters: Object })
 const filters = props.filters
+const emit = defineEmits(['update']);
+
+watch(() => props.filters, (newVal) => 
+        {emit('update', newVal);
+          console.log("new filters: ", newVal)
+        },
+        { deep: true });
 </script>
 
 <style scoped>

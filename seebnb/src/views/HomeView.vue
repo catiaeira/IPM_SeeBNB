@@ -21,28 +21,50 @@
     import Search from '@/components/Search.vue';
     import ImageDict from '@/assets/ImageDict';
     import { useRouter } from 'vue-router';
+    import getFilterParams from '@/utils/formatFilter';
 
     const router = useRouter();
-    function handleSearch(search) {
-        const location = search.locations;
+    async function handleSearch(search) {
+        const { location, location1, location2 } = search.locations;
         const filter = search.filters;
-        console.log(filter)
 
-        if (location.location) { // single city search
-            router.push({ 
-                name: 'City', 
-                params: { city: location.location },
-                query: {...filter}
-            });
-        } else {               // comparison search
-            router.push({ 
-                name: 'Compare', 
-                params: { 
-                    city1: location.location1, 
-                    city2: location.location2 
-                },
-                query: {...filter}
-            });
+        const dataExists = async (name, filter) => {
+            const filter_str = getFilterParams (filter);
+            let link = `http://localhost:3000/${name}.listings?${filter_str}&_limit=1`;
+            
+            const res = await fetch(link);
+            if (!res.ok) return false;
+            const data = await res.json();
+            return data.length > 0;
+        };
+
+        if (location) {
+            if (await dataExists(location, filter)) {
+                router.push({ name: 'City', params: { city: location }, 
+                query: {...Object.fromEntries(
+                    Object.entries(filter).filter(
+                        ([, v]) => v !== null && v !== false && v !== 0
+                    )
+                    )
+                }});
+            } else {
+                alert("no data for that city / filter too specific");
+            }
+        } else if (location1 && location2) {
+            const [exists1, exists2] = await Promise.all([dataExists(location1, filter), dataExists(location2, filter)]);
+            
+            if (exists1 && exists2) {
+                router.push({ 
+                    name: 'Compare', 
+                    params: { city1: location1, city2: location2 }, 
+                    query: {...Object.fromEntries(
+                        Object.entries(filter).filter(
+                            ([, v]) => v !== null && v !== false && v !== 0
+                    ))
+                }});
+            } else {
+                alert("no data for those cities / filter too specific");
+            }
         }
     }
 </script>
