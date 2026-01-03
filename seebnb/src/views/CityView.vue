@@ -112,7 +112,7 @@
 </script>
 <template>
   <div class="page">
-    <CityIntro :cityname="currentCity" color="var(--seagreen)"/>
+    <CityIntro :cityname="this.city" color="var(--seagreen)"/>
 
     <div class="top">
 
@@ -173,6 +173,7 @@
   grid-template-columns: 1fr 1.2fr;
   gap: 2rem;
   align-items: stretch;
+  margin: 0 2%;
 }
 
 .map-card {
