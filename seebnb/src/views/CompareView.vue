@@ -7,7 +7,7 @@
   import ImageDict from '@/assets/ImageDict';
 
   export default {
-    components : {Chart, StatsComponent, Filters},
+    components : {Chart, StatsComponent, Filters, CityIntro},
     data() {
       return {
         listings1: [],
@@ -52,11 +52,7 @@
     async created() {
         await this.fetchData();
     },
-    methods: {    
-      getArrow() {
-        return ImageDict.arrow
-      },
-      
+    methods: {   
       async fetchData() {
         if (!this.city1 || !this.city2) return; 
 
@@ -138,6 +134,11 @@
             )
           }
         });
+      }
+    },
+    computed: {
+      getArrow() {
+        return ImageDict.arrow
       }
     }
   }
