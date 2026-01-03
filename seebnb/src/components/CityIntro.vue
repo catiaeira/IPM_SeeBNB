@@ -29,16 +29,15 @@ const image = computed(() =>
     background-position: center;
     background-repeat: no-repeat;
     height: 40vh;
+    position: relative;
 }
 
 .overlay {
     display: flex;
-    inset: 0;
-    gap: 1rem;
-    position: relative;
-    top: 65%;
-    left: 5%;
     align-items: center;
+    gap: 1rem;
+    position: absolute;
+    inset: auto auto 20% 5%;
 }
 
 .name {

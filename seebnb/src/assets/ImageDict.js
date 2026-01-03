@@ -1,13 +1,19 @@
-import Moon from '@/assets/moon.png'
-import Sun from '@/assets/sun.png'
-import Logo from '@/assets/seebnblogo.png'
+import Moon from '@/assets/NavBarIcons/moon.png'
+import Sun from '@/assets/NavBarIcons/sun.png'
+import Logo from '@/assets/NavBarIcons/seebnblogo.png'
 import Arrow from '@/assets/iconmonstr-arrow.png'
+import ShareDark from '@/assets/NavBarIcons/share-dark.png'
+import ShareLight from '@/assets/NavBarIcons/share-light.png'
 
 export default {
     logo: Logo,
-    moon: Moon,
-    sun: Sun,
+    moon: Moon, // <a href="https://www.flaticon.com/free-icons/night-mode" title="night mode icons">Night mode icons created by Esma Başoğlu - Flaticon</a>
+    sun: Sun, // <a href="https://www.flaticon.com/authors/freepik" title="Freepik"> Freepik </a>
     arrow: Arrow,
+
+    // <a href="https://www.flaticon.com/free-icons/share" title="share icons">Share icons created by edt.im - Flaticon</a>
+    shareDark: ShareDark,
+    shareLight: ShareLight,
 
     cityscape:  "https://images.unsplash.com/photo-1708474660686-7a00a0ffe4ac",
 
