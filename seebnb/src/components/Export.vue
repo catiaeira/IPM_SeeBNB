@@ -149,7 +149,7 @@
         <div class="download">
             <span class="text">Baixar dados:</span>
             <div class="buttons">
-              <button class="button">PNG</button>
+              <button class="button" @click = "createPng">PNG</button>
               <button class="button">CSV</button>
               <button class="button">JSON</button>
             </div>
@@ -161,6 +161,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ImageDict from '@/assets/ImageDict'
+import * as htmlToImage from '@jpinsonneau/html-to-image';
+import { useRoute } from 'vue-router';
 
 const theme = ref('light')
 
@@ -195,6 +197,44 @@ const openPopup = () => {
 
 const closePopup = () => {
   state.value = 'button'
+}
+
+const route = useRoute();
+const atCityView = computed (() => route.path.startsWith('/city'));
+const cities = computed(() => {
+const path = route.path.split('/');
+  if (path[1] === 'compare') {
+    return `${path[2]}-${path[3]}`;
+  }
+  
+  return path[2] || 'unknown'; 
+});
+
+async function createPng() {
+  let elements = []
+  if (atCityView.value) {
+    elements = ['stats', 'trimestralChart', 'cityChart']
+  } else {
+    elements = ['citiesStats', 'monthChart', 'ocupationChart', 'listsChart']
+  }
+  for (const elementId of elements) {
+    const node = document.getElementById(elementId);
+    
+    if (!node) {
+      console.warn(`Element with ID ${elementId} not found.`);
+      continue;
+    }
+    try {
+      const dataUrl = await htmlToImage.toPng(node);
+
+      const link = document.createElement('a');
+      link.download = `${cities.value}_${elementId}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error(`Error capturing ${elementId}:`, err);
+    }
+  }
 }
 </script>
 

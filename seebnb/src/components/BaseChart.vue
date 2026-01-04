@@ -115,7 +115,7 @@ const themeColors = ref({
 
 const getCSSVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-watch(theme, async (newTheme) => {
+watch(theme, async () => {
   await nextTick();
 
   themeColors.value = {
@@ -124,8 +124,6 @@ watch(theme, async (newTheme) => {
     text:      getCSSVar('--text'),
     background: getCSSVar('--background')
   };
-  
-  console.log('Theme colors updated for:', newTheme, themeColors.value);
 }, { immediate: true });
 
 // ^ ^ ^

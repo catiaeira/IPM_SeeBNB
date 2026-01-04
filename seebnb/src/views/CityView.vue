@@ -142,7 +142,7 @@
     </div>
     <div class="top">
 
-      <div class="stats">
+      <div class="stats" id="stats">
         <StatsComponent
           :allListings="allListings"
           />
@@ -167,7 +167,7 @@
         
       </div>
 
-      <div class="trimestral-chart">
+      <div class="trimestral-chart" id="trimestralChart">
         <Chart
           :listings1="allListings"
           :listingsTri1="listingsTri1"
@@ -178,7 +178,7 @@
       </div>
     </div>
 
-    <div class="chart">
+    <div class="chart" id="cityChart">
       <Chart
         :listings1= "allListings"
         mainLabel="listsPerHost"

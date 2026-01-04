@@ -35,6 +35,7 @@
 
 <style>
     .stats-card {
+        font-family: 'Kanit', sans-serif;
         background: var(--blue);
         border-radius: 12px;
         padding: 1.5rem;
@@ -44,6 +45,7 @@
     }
 
     .stat-row {
+        font-family: inherit;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -152,9 +154,15 @@
                 const profit = getAvg(totals.profit, counts.profit)
 
                 this.averageRating = getAvg(totals.rating, counts.rating).toFixed(2);
-                this.averagePrice = getAvg(totals.price, counts.price).toFixed(2);
+                
+                if (totals.price == 0) this.averagePrice = " —"
+                else this.averagePrice = getAvg(totals.price, counts.price).toFixed(2);
+
                 this.averageRentedNights = Math.round(getAvg(totals.nights, counts.nights));
-                this.averageProfit = new Intl.NumberFormat('pt-PT').format(profit.toFixed(2));
+
+                if (totals.profit == 0) this.averageProfit = " —"
+                else this.averageProfit = new Intl.NumberFormat('pt-PT').format(profit.toFixed(2));
+
                 this.shortRentalPercentage = listings.length > 0 
                     ? ((totals.shortRental / listings.length) * 100).toFixed(2) 
                     : 0;

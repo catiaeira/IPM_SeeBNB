@@ -154,7 +154,7 @@
       <Filters :filters="filters" @update="handleFilterUpdate" />
     </div>
 
-    <div class="top">
+    <div class="top" id="citiesStats">
 
       <div class="stats">
         <StatsComponent
@@ -182,21 +182,21 @@
       </div>
     </div>
 
-    <div class="chart">
+    <div class="chart" id="monthChart">
       <Chart
         :listings1= "calendar1"
         :listings2= "calendar2"
         mainLabel="listsPerMonths"
       />
     </div>
-    <div class="chart">
+    <div class="chart" id="ocupationChart">
       <Chart
         :listings1= "listings1"
         :listings2="listings2"
         mainLabel="ocupationCompare"
       />
     </div>
-    <div class="chart">
+    <div class="chart" id="listsChart">
       <Chart
         :listings1= "listings1"
         :listings2="listings2"
@@ -234,7 +234,8 @@
 
 .top {
   display: flex;
-  margin: 0 2%;
+  padding: 0 2%; 
+  box-sizing: border-box;
 }
 
 .stats {
