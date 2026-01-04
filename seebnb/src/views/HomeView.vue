@@ -48,7 +48,7 @@
                     )
                 }});
             } else {
-                alert("no data for that city / filter too specific");
+                alert("No data found for that city / Filter too specific");
             }
         } else if (location1 && location2) {
             const [exists1, exists2] = await Promise.all([dataExists(location1, filter), dataExists(location2, filter)]);
@@ -63,7 +63,7 @@
                     ))
                 }});
             } else {
-                alert("no data for those cities / filter too specific");
+                alert("No data found for that city / Filter too specific");
             }
         }
     }

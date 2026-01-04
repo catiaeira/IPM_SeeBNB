@@ -1,6 +1,6 @@
 <template>
   <footer id="footer">
-    © IPM 2025 seebnb.pt Cátia Eira Filipa Cosquete Marco Ferreira
+    © IPM 2025 • seebnb.pt • Cátia Eira • Filipa Cosquete • Marco Ferreira
   </footer>
 </template>
 
@@ -10,7 +10,7 @@
 
 <style scoped>
 #footer {
-  position: fixed;
+  position: relative;
   bottom: 1%;
   left: 1%;
   width: 98%;
