@@ -3,8 +3,8 @@
   import Chart from '@/components/BaseChart.vue';
   import StatsComponent from '@/components/StatsCard.vue';
   import CityIntro from '@/components/CityIntro.vue';
-  import getFilterParams from '@/utils/formatFilter.js';
   import Filters from '@/components/Filters/Filters.vue';
+  import { fetchCityData } from '@/utils/FetchCityData';
 
   export default {
     components : {MapComponent, Chart, StatsComponent, CityIntro, Filters},
@@ -47,52 +47,23 @@
     },
     methods: {    
       async fetchData() {
-        if (!this.city) return; 
-
+        if (!this.city) return;
         this.setFilters();
+
         try {
-            console.log("Fetching data for:", this.city);
+          const data = await fetchCityData(this.city, this.filters);
+          
+          this.allListings = data.mainListings;
+          this.listingsTri1 = data.trimestral1;
+          this.listingsTri2 = data.trimestral2;
 
-            for (let i = 0; i<3; i++){
-              let link = `http://localhost:3000/${this.city}.listings`;
-              if (i>0) link = link.concat (`(${i})`);
-              const filter_str = getFilterParams (this.filters);
-              const link_w_filter = filter_str ? link + '?' + filter_str : link
-              
-              const response = await fetch(link_w_filter);
-              let data = null;
-              if (response.ok) data = await response.json();
-              
-              if (!response.ok) {
-                this.$router.push({ 
-                  name: 'NotFound',
-                  params: { notFound: 'data-not-found' }
-                });
-                return;
-              }
-              
-              switch (i) {
-                case 0:
-                  this.allListings = data;
-                  break;
-                case 1:
-                  this.listingsTri1 = data;
-                  break;
-                case 2:
-                  this.listingsTri2 = data;
-                  break;
-                default:
-                  break;
-              }                      
-              const target =
-                i === 0 ? this.allListings :
-                i === 1 ? this.listingsTri1 :
-                          this.listingsTri2;
-
-              console.log(`Successfully loaded ${target.length} listings.`);
-            }
-          } catch (error) {
-              console.error("Fetch failed:", error);
+          console.log(`Loaded ${this.allListings.length + this.listingsTri1.length + this.listingsTri2.length} total listings.`);
+        } catch (error) {
+          console.error("Fetch failed, redirecting:", error);
+          this.$router.push({ 
+            name: 'NotFound',
+            params: { notFound: 'data-not-found' }
+          });
         }
       },
       changeTrimestralDataState(direction) {

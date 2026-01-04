@@ -151,7 +151,9 @@
             <div class="buttons">
               <button class="button" @click = "createPng">PNG</button>
               <button class="button">CSV</button>
-              <button class="button">JSON</button>
+              <button class="button" @click="createJson" :disabled="isLoading">
+                {{ isLoading ? '(...)' : 'JSON' }}
+              </button>
             </div>
         </div>
     </div>
@@ -163,6 +165,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ImageDict from '@/assets/ImageDict'
 import * as htmlToImage from '@jpinsonneau/html-to-image';
 import { useRoute } from 'vue-router';
+import { fetchCityData, fetchComparisonData } from '@/utils/FetchCityData';
 
 const theme = ref('light')
 
@@ -199,16 +202,55 @@ const closePopup = () => {
   state.value = 'button'
 }
 
-const route = useRoute();
-const atCityView = computed (() => route.path.startsWith('/city'));
+const isLoading = ref(false)
+
+const route = useRoute()
+
+const city1 = computed(() =>
+  route.params.city1 || route.params.city
+)
+const city2 = computed(() => route.params.city2)
+
+const atCityView = computed(() => route.path.startsWith('/city'))
+
 const cities = computed(() => {
-const path = route.path.split('/');
-  if (path[1] === 'compare') {
-    return `${path[2]}-${path[3]}`;
+  if (city2.value) return `${city1.value}-${city2.value}`
+  return `${city1.value}`
+})
+
+async function createJson() {
+  if (isLoading.value) return
+
+  try {
+    isLoading.value = true
+    
+    const exportData = atCityView.value
+      ? await fetchCityData(city1.value, route.query)
+      : await fetchComparisonData(city1.value, city2.value, route.query)
+
+    if (!exportData) return
+
+    const jsonString = JSON.stringify(exportData, null, 2)
+
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${cities.value}.json`
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.error('Export failed:', err)
+  } finally {
+    isLoading.value = false
   }
-  
-  return path[2] || 'unknown'; 
-});
+}
+
 
 async function createPng() {
   let elements = []
