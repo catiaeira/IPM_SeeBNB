@@ -21,7 +21,7 @@
     import Search from '@/components/Search.vue';
     import ImageDict from '@/assets/ImageDict';
     import { useRouter } from 'vue-router';
-    import getFilterParams from '@/utils/formatFilter';
+    import getFilterParams from '@/utils/FetchCityData';
 
     const router = useRouter();
     async function handleSearch(search) {
