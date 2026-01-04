@@ -6,26 +6,18 @@
       <img :src="ImageDict.logo" width="50px"/>
     </div>
     
-
     <!-- Right: -->
     <div class="right-side">
-      <Export v-if="notOnHome"></Export>
+      <Export ></Export>
       <ThemeToggle></ThemeToggle>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-
 import ImageDict from '@/assets/ImageDict'
 import ThemeToggle from './ThemeToggle.vue'
 import Export from './Export.vue'
-
-const route = useRoute()
-
-const notOnHome = computed(() => route.path !== '/home')
 </script>
 
 <style scoped>
@@ -60,13 +52,11 @@ const notOnHome = computed(() => route.path !== '/home')
   text-decoration: none;
 }
 
-/* Left side container */
 .left-side{
   display: flex;
   align-items: center;
 }
 
-/* Right side container */
 .right-side{
   display: flex;
   align-items: center;
