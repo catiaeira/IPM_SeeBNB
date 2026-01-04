@@ -4,9 +4,11 @@
     import StatsComponent from '@/components/StatsCard.vue';
     import CityIntro from '@/components/CityIntro.vue';
     import getFilterParams from '@/utils/formatFilter.js';
+    import Table from '@/components/Table.vue';
+    import { filterBy, mostAffectedArea, percentChange } from '@/utils/listingAnalytics';
 
     export default {
-        components : {MapComponent, Chart, StatsComponent, CityIntro},
+        components : {MapComponent, Chart, StatsComponent, CityIntro, Table},
         data() {
             return {
             allListings: [],
@@ -38,6 +40,101 @@
               short: this.$route.query.short === 'true',
               long: this.$route.query.long === 'true'
             }
+          },
+
+          listingsOver250Current() {
+            return filterBy(this.allListings, l => l.estimated_occupancy_l365d > 250)
+          },
+
+          listingsOver250Prev() {
+            return filterBy(this.listingsTri1, l => l.estimated_occupancy_l365d > 250)
+          },
+
+          hostsOver5ListingsCurrent() {
+            return filterBy(this.allListings, l => l.host_total_listings_count > 5)
+          },
+
+          hostsOver5ListingsPrev() {
+            return filterBy(this.listingsTri1, l => l.host_total_listings_count > 5)
+          },
+
+          unregisteredListingsCurrent() {
+            return filterBy(this.allListings, l => !l.license)
+          },
+
+          unregisteredListingsPrev() {
+            return filterBy(this.listingsTri1, l => !l.license)
+          },
+
+          countOver250Current() {
+            return this.listingsOver250Current.length
+          },
+
+          countOver250Prev() {
+            return this.listingsOver250Prev.length
+          },
+
+          countHostsOver5Current() {
+            return this.hostsOver5ListingsCurrent.length
+          },
+
+          countHostsOver5Prev() {
+            return this.hostsOver5ListingsPrev.length
+          },
+
+          countUnregisteredCurrent() {
+            return this.unregisteredListingsCurrent.length
+          },
+
+          countUnregisteredPrev() {
+            return this.unregisteredListingsPrev.length
+          },
+
+          over250PrevComparePercent() {
+            return percentChange(this.countOver250Current, this.countOver250Prev)
+          },
+
+          hostsOver5PrevComparePercent() {
+            return percentChange(this.countHostsOver5Current, this.countHostsOver5Prev)
+          },
+
+          unregisteredPrevComparePercent() {
+            return percentChange(this.countUnregisteredCurrent, this.countUnregisteredPrev)
+          },
+
+          mostAffectedAreaOver250() {
+            return mostAffectedArea(this.listingsOver250Current)
+          },
+
+          mostAffectedAreaHostsOver5() {
+            return mostAffectedArea(this.hostsOver5ListingsCurrent)
+          },
+
+          mostAffectedAreaUnregistered() {
+            return mostAffectedArea(this.unregisteredListingsCurrent)
+          },
+
+          regulationTableRows() {
+            return [
+              [
+                'Alojamentos >250 dias/ano',
+                this.countOver250Current,
+                this.mostAffectedAreaOver250,
+                this.over250PrevComparePercent !== null ? `${this.over250PrevComparePercent}%` : '-'
+              ],
+              [
+                'Hosts com 5+ listagens',
+                this.countHostsOver5Current,
+                this.mostAffectedAreaHostsOver5,
+                this.hostsOver5PrevComparePercent !== null ? `${this.hostsOver5PrevComparePercent}%` : '-'
+              ],
+              [
+                'ALs sem registo',
+                this.countUnregisteredCurrent,
+                this.mostAffectedAreaUnregistered,
+                this.unregisteredPrevComparePercent !== null ? `${this.unregisteredPrevComparePercent}%` : '-'
+              ]
+            ]
           }
         },
         async created() {
@@ -110,9 +207,10 @@
     }
 
 </script>
+
 <template>
   <div class="page">
-    <CityIntro :cityname="currentCity" color="var(--seagreen)"/>
+    <CityIntro :cityname="city" color="var(--seagreen)"/>
 
     <div class="top">
 
@@ -158,6 +256,15 @@
         mainLabel="listsPerHost"
       />
     </div>
+
+    <div class="table">
+      <h1>Elementos para regularização (último trimestre)</h1>
+      <br>
+      <Table
+        :columns="['Indicador', 'Valor', 'Zona mais afetada', 'Comparação trimestral']"
+        :rows="regulationTableRows">
+      </Table>
+    </div>
   </div>
 </template>
 
@@ -200,6 +307,16 @@
 .chart {
   border-radius: 12px;
   padding: 1.5rem;
+}
+
+.table {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table Table {
+  font-size: 1.3em;
 }
 
 </style>
