@@ -150,9 +150,11 @@
             <span class="text">Baixar dados:</span>
             <div class="buttons">
               <button class="button" @click = "createPng">PNG</button>
-              <button class="button">CSV</button>
-              <button class="button" @click="createJson" :disabled="isLoading">
-                {{ isLoading ? '(...)' : 'JSON' }}
+              <button class="button" @click="createCSV" :disabled="isLoadingCSV">
+                {{ isLoadingCSV ? '(...)' : 'CSV' }}
+              </button>
+              <button class="button" @click="createJson" :disabled="isLoadingJSON">
+                {{ isLoadingJSON ? '(...)' : 'JSON' }}
               </button>
             </div>
         </div>
@@ -202,7 +204,9 @@ const closePopup = () => {
   state.value = 'button'
 }
 
-const isLoading = ref(false)
+const isLoadingJSON = ref(false)
+const isLoadingCSV = ref(false)
+
 
 const route = useRoute()
 
@@ -219,11 +223,11 @@ const cities = computed(() => {
 })
 
 async function createJson() {
-  if (isLoading.value) return
+  if (isLoadingJSON.value) return
 
   try {
-    isLoading.value = true
-    
+    isLoadingJSON.value = true
+
     const exportData = atCityView.value
       ? await fetchCityData(city1.value, route.query)
       : await fetchComparisonData(city1.value, city2.value, route.query)
@@ -247,7 +251,69 @@ async function createJson() {
   } catch (err) {
     console.error('Export failed:', err)
   } finally {
-    isLoading.value = false
+    isLoadingJSON.value = false
+  }
+}
+
+// util
+function jsonToCSV(array) {
+  if (!array || array.length === 0) return '';
+  
+  const headers = Object.keys(array[0]);
+  
+  const rows = array.map(obj => 
+    headers.map(header => {
+      const value = obj[header] ?? '';
+      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }).join(',')
+  );
+
+  return [headers.join(','), ...rows].join('\n');
+}
+
+async function createCSV() {
+  if (isLoadingCSV.value) return;
+  
+  try {
+    isLoadingCSV.value = true;
+    
+    const exportData = atCityView.value
+      ? await fetchCityData(city1.value, route.query)
+      : await fetchComparisonData(city1.value, city2.value, route.query);
+
+    if (!exportData) return;
+
+    let dataToConvert = [];
+    if (atCityView.value) {
+      dataToConvert = exportData.mainListings; 
+    } else {
+      dataToConvert = [...exportData.city1.listings, ...exportData.city2.listings];
+    }
+
+    // convert JSON to CSV string
+    const csv = jsonToCSV(dataToConvert);
+    if (!csv) {
+      console.warn("No data available to export");
+      return;
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.href = url;
+    link.setAttribute('download', `${atCityView.value ? city1.value : 'comparison'}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+  } catch (err) {
+    console.error('Export failed:', err);
+  } finally {
+    isLoadingCSV.value = false;
   }
 }
 
