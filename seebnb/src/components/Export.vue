@@ -162,9 +162,13 @@
         <div class="download">
             <span class="text">Baixar dados:</span>
             <div class="buttons">
-              <button class="button">PNG</button>
-              <button class="button">CSV</button>
-              <button class="button">JSON</button>
+              <button class="button" @click = "createPng">PNG</button>
+              <button class="button" @click="createCSV" :disabled="isLoadingCSV">
+                {{ isLoadingCSV ? '(...)' : 'CSV' }}
+              </button>
+              <button class="button" @click="createJson" :disabled="isLoadingJSON">
+                {{ isLoadingJSON ? '(...)' : 'JSON' }}
+              </button>
             </div>
         </div>
     </div>
@@ -174,6 +178,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import ImageDict from '@/assets/ImageDict'
+import * as htmlToImage from '@jpinsonneau/html-to-image';
+import { fetchCityData, fetchComparisonData } from '@/utils/FetchCityData';
 import { ShareNetwork } from "vue3-social-sharing";
 import { useRoute } from 'vue-router'
 
@@ -215,6 +221,144 @@ const togglePopup = () => {
 function copyURL() {
   navigator.clipboard.writeText(fullUrl.value)
   alert('Link copied!')
+}
+
+const isLoadingJSON = ref(false)
+const isLoadingCSV = ref(false)
+
+const city1 = computed(() =>
+  route.params.city1 || route.params.city
+)
+const city2 = computed(() => route.params.city2)
+
+const atCityView = computed(() => route.path.startsWith('/city'))
+
+const cities = computed(() => {
+  if (city2.value) return `${city1.value}-${city2.value}`
+  return `${city1.value}`
+})
+
+async function createJson() {
+  if (isLoadingJSON.value) return
+
+  try {
+    isLoadingJSON.value = true
+
+    const exportData = atCityView.value
+      ? await fetchCityData(city1.value, route.query)
+      : await fetchComparisonData(city1.value, city2.value, route.query)
+
+    if (!exportData) return
+
+    const jsonString = JSON.stringify(exportData, null, 2)
+
+    const blob = new Blob([jsonString], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${cities.value}.json`
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+  } catch (err) {
+    console.error('Export failed:', err)
+  } finally {
+    isLoadingJSON.value = false
+  }
+}
+
+// util
+function jsonToCSV(array) {
+  if (!array || array.length === 0) return '';
+  
+  const headers = Object.keys(array[0]);
+  
+  const rows = array.map(obj => 
+    headers.map(header => {
+      const value = obj[header] ?? '';
+      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }).join(',')
+  );
+
+  return [headers.join(','), ...rows].join('\n');
+}
+
+async function createCSV() {
+  if (isLoadingCSV.value) return;
+  
+  try {
+    isLoadingCSV.value = true;
+    
+    const exportData = atCityView.value
+      ? await fetchCityData(city1.value, route.query)
+      : await fetchComparisonData(city1.value, city2.value, route.query);
+
+    if (!exportData) return;
+
+    let dataToConvert = [];
+    if (atCityView.value) {
+      dataToConvert = exportData.mainListings; 
+    } else {
+      dataToConvert = [...exportData.city1.listings, ...exportData.city2.listings];
+    }
+
+    // convert JSON to CSV string
+    const csv = jsonToCSV(dataToConvert);
+    if (!csv) {
+      console.warn("No data available to export");
+      return;
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.href = url;
+    link.setAttribute('download', `${atCityView.value ? city1.value : 'comparison'}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+  } catch (err) {
+    console.error('Export failed:', err);
+  } finally {
+    isLoadingCSV.value = false;
+  }
+}
+
+
+async function createPng() {
+  let elements = []
+  if (atCityView.value) {
+    elements = ['stats', 'trimestralChart', 'cityChart']
+  } else {
+    elements = ['citiesStats', 'monthChart', 'ocupationChart', 'listsChart']
+  }
+  for (const elementId of elements) {
+    const node = document.getElementById(elementId);
+    
+    if (!node) {
+      console.warn(`Element with ID ${elementId} not found.`);
+      continue;
+    }
+    try {
+      const dataUrl = await htmlToImage.toPng(node);
+
+      const link = document.createElement('a');
+      link.download = `${cities.value}_${elementId}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error(`Error capturing ${elementId}:`, err);
+    }
+  }
 }
 </script>
 
