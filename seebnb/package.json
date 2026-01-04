@@ -19,7 +19,8 @@
     "rbush": "^4.0.1",
     "vue": "^3.5.25",
     "vue-chartjs": "^5.3.3",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue3-social-sharing": "^1.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
