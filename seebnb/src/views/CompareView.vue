@@ -5,9 +5,14 @@
   import Filters from '@/components/Filters/Filters.vue';
   import CityIntro from '@/components/CityIntro.vue';
   import ImageDict from '@/assets/ImageDict';
+  import { useFilters } from '@/composables/useFilters'
 
   export default {
     components : {Chart, StatsComponent, Filters, CityIntro},
+    setup() {
+      const { filters } = useFilters()
+      return { filters }
+    },
     data() {
       return {
         listings1: [],
@@ -17,18 +22,6 @@
 
         stats1: null,
         stats2: null,
-
-        filters: {
-          private_room: false,
-          shared_room: false,
-          apt: false,
-          hotel: false,
-          priceMin: null,
-          priceMax: null,
-          rating: 0,
-          short: false,
-          long: false
-        }
       }
     },
     props: {
@@ -47,6 +40,18 @@
         city2: {
             handler: 'fetchData',
             immediate: false
+        },
+        filters: {
+          deep: true,
+          handler(newFilters) {
+            this.$router.replace({
+              query: Object.fromEntries(
+                Object.entries(newFilters).filter(
+                  ([, v]) => v !== null && v !== false && v !== 0
+                )
+              )
+            })
+          }
         }
     },
     async created() {
@@ -122,18 +127,6 @@
           this.filters.rating       = query.rating ? Number(query.rating) : 0;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
-      },
-
-      handleFilterUpdate(updatedFilters) {
-        this.$router.push({
-          query: {
-            ...Object.fromEntries(
-              Object.entries(updatedFilters).filter(
-                ([, v]) => v !== null && v !== false && v !== 0
-              )
-            )
-          }
-        });
       }
     },
     computed: {
@@ -151,7 +144,7 @@
     </div>
 
     <div class="filter-wrapper">
-      <Filters :filters="filters" @update="handleFilterUpdate" />
+      <Filters />
     </div>
 
     <div class="top">

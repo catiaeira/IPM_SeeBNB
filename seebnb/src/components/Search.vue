@@ -28,7 +28,7 @@
         <button class="search-btn" @click="submitSearch"><span class="magnifier">🔍︎</span></button>
       </div>
 
-      <Filters :filters="filters" />
+      <Filters/>
     </div>
   </div>
 </template>
@@ -37,6 +37,7 @@
 import { reactive, ref } from "vue"
 import Filters from './Filters/Filters.vue'
 import { normalizeCityName } from "@/utils/CityTranslation"
+import { useFilters } from '@/composables/useFilters'
 
 const emit = defineEmits(['search'])
 
@@ -48,17 +49,7 @@ const locations = reactive({
   location2: ''
 })
 
-const filters = reactive({
-  private_room: false,
-  shared_room: false,
-  apt: false,
-  hotel: false,
-  priceMin: null,
-  priceMax: null,
-  rating: 0,
-  short: false,
-  long: false
-})
+const { filters } = useFilters()
 
 function submitSearch() {
   let locations_normalized = {
@@ -66,6 +57,8 @@ function submitSearch() {
     location1: normalizeCityName(locations.location1),
     location2: normalizeCityName(locations.location2),
   }
+  console.log(locations_normalized)
+  console.log(filters)
   emit('search', { filters, locations: locations_normalized })
 }
 

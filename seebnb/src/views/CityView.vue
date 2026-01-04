@@ -5,9 +5,14 @@
   import CityIntro from '@/components/CityIntro.vue';
   import getFilterParams from '@/utils/formatFilter.js';
   import Filters from '@/components/Filters/Filters.vue';
+  import { useFilters } from '@/composables/useFilters'
 
   export default {
     components : {MapComponent, Chart, StatsComponent, CityIntro, Filters},
+    setup() {
+      const { filters } = useFilters()
+      return { filters }
+    },
     data() {
       return {
         allListings: [],
@@ -15,18 +20,6 @@
         listingsTri2:[],
         triStates: ['Listagens', 'Preço', 'Ocupação'],
         trimestralState: 0, // listings = 0, price, occupation
-
-        filters: {
-          private_room: false,
-          shared_room: false,
-          apt: false,
-          hotel: false,
-          priceMin: null,
-          priceMax: null,
-          rating: 0,
-          short: false,
-          long: false
-        }
       }
     },
     props: {
@@ -44,6 +37,18 @@
             handler: 'fetchData',
             immediate: false
         },
+        filters: {
+          deep: true,
+          handler(newFilters) {
+            this.$router.replace({
+              query: Object.fromEntries(
+                Object.entries(newFilters).filter(
+                  ([, v]) => v !== null && v !== false && v !== 0
+                )
+              )
+            })
+          }
+        }
     },
     methods: {    
       async fetchData() {
@@ -116,18 +121,6 @@
           this.filters.rating       = query.rating ? Number(query.rating) : 0;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
-      },
-
-      handleFilterUpdate(updatedFilters) {
-        this.$router.push({
-          query: {
-            ...Object.fromEntries(
-              Object.entries(updatedFilters).filter(
-                ([, v]) => v !== null && v !== false && v !== 0
-              )
-            )
-          }
-        });
       }
     }
   }
@@ -138,7 +131,7 @@
     <CityIntro :cityname="this.city" color="var(--seagreen)"/>
     
     <div class="filter-wrapper">
-      <Filters :filters="filters" @update="handleFilterUpdate" />
+      <Filters />
     </div>
     <div class="top">
 
