@@ -89,7 +89,8 @@
           this.filters.hotel        = query.hotel === 'true';
           this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
           this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
-          this.filters.rating       = query.rating ? Number(query.rating) : 0;
+          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
       }
