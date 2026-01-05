@@ -337,7 +337,7 @@ async function createCSV() {
 async function createPng() {
   let elements = []
   if (atCityView.value) {
-    elements = ['stats', 'trimestralChart', 'cityChart']
+    elements = ['stats', 'export-tri-list', 'export-tri-price', 'export-tri-ocup', 'cityChart']
   } else {
     elements = ['citiesStats', 'monthChart', 'ocupationChart', 'listsChart']
   }

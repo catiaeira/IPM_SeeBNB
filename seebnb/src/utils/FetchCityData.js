@@ -11,9 +11,8 @@ export default function getFilterParams(filter) {
     if (filter.short)        params.append('minimum_nights_lte', 30);
     if (filter.long)         params.append('minimum_nights_gte', 30);
     
-    if (filter.rating){      params.append('review_scores_rating_gte', filter.rating[0]);
-                             params.append('review_scores_rating_lte', filter.rating[1]);
-    }   
+    if (filter.fromRating)   params.append('review_scores_rating_gte', filter.fromRating);
+    if (filter.toRating)   params.append('review_scores_rating_lte', filter.toRating);
 
     return params.toString();
 }

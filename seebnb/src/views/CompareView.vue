@@ -91,7 +91,8 @@
           this.filters.hotel        = query.hotel === 'true';
           this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
           this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
-          this.filters.rating       = query.rating ? Number(query.rating) : 0;
+          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
       }
@@ -106,8 +107,8 @@
 <template>
   <div class="page">
     <div class="cards">
-      <CityIntro class="item" :cityname="city1" color="var(--seagreen)"/>
-      <CityIntro class="item" :cityname="city2" color="var(--light-blue)"/>
+      <CityIntro class="item" :cityname="city1" color="var(--seagreen)"   @click="$router.push({ name: 'City', params: { city: city1 }})"/>
+      <CityIntro class="item" :cityname="city2" color="var(--light-blue)" @click="$router.push({ name: 'City', params: { city: city2 }})"/>
     </div>
 
     <div class="filter-wrapper">
@@ -179,6 +180,7 @@
 
 .item {
   width: 50%;
+  cursor: pointer;
 }
   
 .filter-wrapper {

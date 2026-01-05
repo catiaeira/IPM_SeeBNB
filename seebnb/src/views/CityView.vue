@@ -89,7 +89,8 @@
           this.filters.hotel        = query.hotel === 'true';
           this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
           this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
-          this.filters.rating       = query.rating ? Number(query.rating) : 0;
+          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
       }
@@ -129,6 +130,31 @@
 
       <div id="triDots">
         
+      </div>
+
+      <!-- to export -->
+      <div class="off-screen-stage trimestral-chart">
+        <div id="export-tri-list">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="0" 
+          mainLabel="trimestral"/>
+        </div>
+        <div id="export-tri-price">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="1" 
+          mainLabel="trimestral"/>
+        </div>
+        <div id="export-tri-ocup">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="2" 
+          mainLabel="trimestral"/>
+        </div>
       </div>
 
       <div class="trimestral-chart" id="trimestralChart">
@@ -197,6 +223,12 @@
 .chart {
   border-radius: 12px;
   padding: 1.5rem;
+}
+
+.off-screen-stage {
+  position: absolute;
+  left: -9999px;
+  top: 0;
 }
 
 </style>
