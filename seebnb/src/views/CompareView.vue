@@ -106,8 +106,8 @@
 <template>
   <div class="page">
     <div class="cards">
-      <CityIntro class="item" :cityname="city1" color="var(--seagreen)"/>
-      <CityIntro class="item" :cityname="city2" color="var(--light-blue)"/>
+      <CityIntro class="item" :cityname="city1" color="var(--seagreen)"   @click="$router.push({ name: 'City', params: { city: city1 }})"/>
+      <CityIntro class="item" :cityname="city2" color="var(--light-blue)" @click="$router.push({ name: 'City', params: { city: city2 }})"/>
     </div>
 
     <div class="filter-wrapper">
