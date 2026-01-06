@@ -86,7 +86,6 @@ function selectTab(tab) {
   background-color: var(--light-blue);
   padding: 0.5rem 1rem;
   font-size: larger;
-  font-weight: 600;
   color: var(--text);
   cursor: pointer;
   text-align: center;

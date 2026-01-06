@@ -44,7 +44,6 @@ function toggle() {
 .text {
   color: var(--text);
   font-size: 1.2rem;
-  font-weight: 550;
   transition: color 0.2s ease;
 }
 </style>

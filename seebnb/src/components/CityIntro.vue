@@ -46,7 +46,7 @@ const image = computed(() =>
 .name {
     color: var(--image_text);
     font-size: 2rem;
-    font-weight: 600;
+    font-weight: 500;
     text-shadow:
         0 0 2px var(--text),
         0 0 4px var(--text),

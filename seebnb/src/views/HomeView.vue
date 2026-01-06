@@ -110,7 +110,6 @@
 
 .text {
     font-size: 2.2rem;
-    font-weight: 600;
     color: var(--text);
     transition: color 0.2s ease;
 }

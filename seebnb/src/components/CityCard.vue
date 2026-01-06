@@ -65,7 +65,6 @@ export default {
 .city-name {
     color: var(--image_text);
     font-size: 2rem;
-    font-weight: 600;
     margin: 0;
     text-shadow:
         0 0 2px var(--text),
