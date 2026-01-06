@@ -91,8 +91,8 @@
           this.filters.hotel        = query.hotel === 'true';
           this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
           this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
-          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
-          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
+          this.filters.fromRating   = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating     = query.toRating ? Number(query.toRating) : 5;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
       }
@@ -115,8 +115,8 @@
       <Filters />
     </div>
 
+    <h1 class="text">Dados do último trimestre</h1>
     <div class="top" id="citiesStats">
-
       <div class="stats">
         <StatsComponent
           :allListings="listings1"
@@ -188,10 +188,9 @@
     align-self: center;
 }
 
-.cityName {
-  -webkit-text-stroke: 1px rgb(255, 255, 255);
-  font-size: 30px;
-  font-weight: bolder;
+.text {
+  margin-left: 2%;
+  font-size: 1.5rem;
 }
 
 .top {

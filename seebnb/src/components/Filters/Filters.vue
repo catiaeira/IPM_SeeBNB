@@ -95,7 +95,6 @@ watch( filters, (newVal) => {
 .text {
   color: var(--text);
   font-size: 1.2rem;
-  font-weight: 550;
 }
 
 </style>

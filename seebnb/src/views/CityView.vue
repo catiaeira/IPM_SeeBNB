@@ -89,8 +89,8 @@
           this.filters.hotel        = query.hotel === 'true';
           this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
           this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
-          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
-          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
+          this.filters.fromRating   = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating     = query.toRating ? Number(query.toRating) : 5;
           this.filters.short        = query.short === 'true';
           this.filters.long         = query.long === 'true';
       }
@@ -105,6 +105,7 @@
     <div class="filter-wrapper">
       <Filters />
     </div>
+    <span class="text">Dados do último trimestre</span>
     <div class="top">
 
       <div class="stats" id="stats">
@@ -120,51 +121,66 @@
         />
       </div>
     </div>
-    <div>Dados Trimestrais</div>
-    <div class="trimestral-data">
-      <div id="triButton">
-        <button id="buttonUp" @click.stop="changeTrimestralDataState('up')"></button>
-        <div id="buttonLabel">{{ triStates[trimestralState] }}</div>
-        <button id="buttonDown" @click.stop="changeTrimestralDataState('down')"></button>
-      </div>
+    <span class="text">Dados Trimestrais</span>
+    <div class="graphs-wrapper">
+      <div class="trimestral-data">
+        <div id="triButton">
+          <button class="button up" @click.stop="changeTrimestralDataState('up')">▲</button>
+          <div id="label">{{ triStates[trimestralState] }}</div>
+          <button class="button down" @click.stop="changeTrimestralDataState('down')">▼</button>
+        </div>
 
-      <div id="triDots">
+        <div id="triDots">
+          <div
+            class="dot"
+            :style="{ backgroundColor: triStates[trimestralState] === 'Ocupação' ? 'var(--seagreen)' : 'var(--text)' }"
+          ></div>
         
-      </div>
+          <div
+            class="dot"
+            :style="{ backgroundColor: triStates[trimestralState] === 'Preço' ? 'var(--seagreen)' : 'var(--text)' }"
+          ></div>
+        
+          <div
+            class="dot"
+            :style="{ backgroundColor: triStates[trimestralState] === 'Listagens' ? 'var(--seagreen)' : 'var(--text)' }"
+          ></div>
+        </div>
 
-      <!-- to export -->
-      <div class="off-screen-stage trimestral-chart">
-        <div id="export-tri-list">
-          <Chart :listings1="allListings"
-          :listingsTri1="listingsTri1"
-          :listingsTri2="listingsTri2" 
-          :triState="0" 
-          mainLabel="trimestral"/>
+        <!-- to export -->
+        <div class="off-screen-stage trimestral-chart">
+          <div id="export-tri-list">
+            <Chart :listings1="allListings"
+            :listingsTri1="listingsTri1"
+            :listingsTri2="listingsTri2" 
+            :triState="0" 
+            mainLabel="trimestral"/>
+          </div>
+          <div id="export-tri-price">
+            <Chart :listings1="allListings"
+            :listingsTri1="listingsTri1"
+            :listingsTri2="listingsTri2" 
+            :triState="1" 
+            mainLabel="trimestral"/>
+          </div>
+          <div id="export-tri-ocup">
+            <Chart :listings1="allListings"
+            :listingsTri1="listingsTri1"
+            :listingsTri2="listingsTri2" 
+            :triState="2" 
+            mainLabel="trimestral"/>
+          </div>
         </div>
-        <div id="export-tri-price">
-          <Chart :listings1="allListings"
-          :listingsTri1="listingsTri1"
-          :listingsTri2="listingsTri2" 
-          :triState="1" 
-          mainLabel="trimestral"/>
-        </div>
-        <div id="export-tri-ocup">
-          <Chart :listings1="allListings"
-          :listingsTri1="listingsTri1"
-          :listingsTri2="listingsTri2" 
-          :triState="2" 
-          mainLabel="trimestral"/>
-        </div>
-      </div>
 
-      <div class="trimestral-chart" id="trimestralChart">
-        <Chart
-          :listings1="allListings"
-          :listingsTri1="listingsTri1"
-          :listingsTri2="listingsTri2"
-          :triState="trimestralState"
-          mainLabel="trimestral"
-        />
+        <div class="trimestral-chart" id="trimestralChart">
+          <Chart
+            :listings1="allListings"
+            :listingsTri1="listingsTri1"
+            :listingsTri2="listingsTri2"
+            :triState="trimestralState"
+            mainLabel="trimestral"
+          />
+        </div>
       </div>
     </div>
 
@@ -188,6 +204,11 @@
 .filter-wrapper {
     width: 90%;
     align-self: center;
+}
+
+.text {
+  margin-left: 2%;
+  font-size: 1.5rem;
 }
 
 .top {
@@ -229,6 +250,70 @@
   position: absolute;
   left: -9999px;
   top: 0;
+}
+
+.graphs-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 40vh;
+}
+
+#triButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 2rem;
+  height: 8rem;
+  border-radius: 12px
+}
+
+#triDots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 50px;
+  width: 50px;
+  gap: 0.5rem;
+}
+
+.dot{
+  height: 1rem;
+  width: 1rem;
+  border-radius: 100%;
+  transition: 0.2s ease-in-out;
+  border: 1px solid var(--text);
+}
+
+#label {
+  padding: 2px;
+  height: 60%;
+  text-align: center;
+  border: 2px solid var(--text);
+}
+
+.button {
+  height: 20%;
+  background: none;
+  background-color: var(--blue);
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  border: 2px solid var(--text);
+}
+
+.up{
+  border-radius: 12px 12px 0 0;
+}
+
+.down{
+  border-radius: 0 0 12px 12px;
+}
+
+#label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 </style>

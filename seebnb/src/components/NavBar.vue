@@ -42,7 +42,6 @@ import Export from './Export.vue'
   text-decoration: none;
   padding: 0;
   margin: 0;
-  font-weight: 600;
   color: var(--text);
   background: transparent;
 }

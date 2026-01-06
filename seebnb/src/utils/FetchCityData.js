@@ -1,8 +1,8 @@
 export default function getFilterParams(filter) {
     const params = new URLSearchParams();
     if (filter.private_room) params.append('room_type', 'Private room');
-    if (filter.shared_room)  params.append('property_type', 'Shared room in home');
-    if (filter.apt)          params.append('room_type_like', 'apt');
+    if (filter.shared_room)  params.append('room_type', 'Shared room');
+    if (filter.apt)          params.append('room_type', 'Entire home/apt');
     if (filter.hotel)        params.append('room_type', 'Hotel room');
     
     if (filter.priceMin)     params.append('price_gte', filter.priceMin);

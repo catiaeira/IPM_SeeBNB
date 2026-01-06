@@ -68,7 +68,6 @@ const cities = [
 
 .text {
     font-size: 2.2rem;
-    font-weight: 600;
     color: var(--text);
 }
 </style>

@@ -420,7 +420,6 @@ async function createPng() {
   background-color: black;
   color: white;
   font-size: 1.2rem;
-  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.1s ease, transform 0.1s ease;
 }
@@ -460,6 +459,5 @@ svg:active { transform: scale(0.90); }
 .text {
   color: black;
   font-size: 1.7rem;
-  font-weight: 500;
 }
 </style>
