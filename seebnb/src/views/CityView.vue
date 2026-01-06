@@ -1,6 +1,6 @@
 <script>    
   import MapComponent from '@/components/Map.vue';
-  import Chart from '@/components/Bay7seChart.vue';
+  import Chart from '@/components/BaseChart.vue';
   import StatsComponent from '@/components/StatsCard.vue';
   import CityIntro from '@/components/CityIntro.vue';
   import Filters from '@/components/Filters/Filters.vue';
@@ -417,6 +417,7 @@
 
 .table Table {
   font-size: 1.3em;
+}
   
 .off-screen-stage {
   position: absolute;
