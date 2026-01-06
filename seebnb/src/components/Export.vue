@@ -337,7 +337,7 @@ async function createCSV() {
 async function createPng() {
   let elements = []
   if (atCityView.value) {
-    elements = ['stats', 'export-tri-list', 'export-tri-price', 'export-tri-ocup', 'cityChart']
+    elements = ['stats', 'export-tri-list', 'export-tri-price', 'export-tri-ocup', 'cityChart', 'tableReg', 'tableZone']
   } else {
     elements = ['citiesStats', 'monthChart', 'ocupationChart', 'listsChart']
   }
@@ -349,7 +349,8 @@ async function createPng() {
       continue;
     }
     try {
-      const dataUrl = await htmlToImage.toPng(node);
+      const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
+      const dataUrl = await htmlToImage.toPng(node, {backgroundColor: backgroundColor});
 
       const link = document.createElement('a');
       link.download = `${cities.value}_${elementId}.png`;
