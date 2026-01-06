@@ -312,10 +312,10 @@
       <br>
       <Table
         :columns="[
-          { label: 'Zona', sortable: true},
-          { label: 'Ocupação média', sortable: true},
-          { label: 'Número de Listagens', sortable: true},
-          { label: 'Preço médio ($)', sortable: true},
+          { label: 'Zona', sortable: true },
+          { label: 'Ocupação média', sortable: true, format: v => `${Number(v).toFixed(1)}` },
+          { label: 'Número de Listagens', sortable: true, format: v => `${Number(v).toFixed(0)}` },
+          { label: 'Preço médio ($)', sortable: true, format: v => `${Number(v).toFixed(2)}` },
         ]"
         :rows="zoneTableRows"
       />

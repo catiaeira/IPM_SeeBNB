@@ -22,7 +22,7 @@
     <tbody>
       <tr v-for="(row, rowIndex) in sortedRows" :key="rowIndex">
         <td v-for="(cell, cellIndex) in row" :key="cellIndex">
-          {{ formatCell(cell) }}
+          {{ formatCell(cell, cellIndex) }}
         </td>
       </tr>
     </tbody>
@@ -74,10 +74,11 @@ function sortIndicator(colIndex) {
   return sortDirection.value === 1 ? '↑' : '↓'
 }
 
-function formatCell(value) {
-  if(typeof value === 'number' && !Number.isInteger(value)) {
-    return value.toFixed(2)
-  }
+function formatCell(value, colIndex) {
+  const column = props.columns[colIndex]
+
+  if(column.format) return column.format(value)
+
   return value
 }
 
@@ -108,7 +109,7 @@ function formatCell(value) {
         background: none;
         border: none;
         cursor: pointer;
-        font-size: 0.9em;
+        font-size: 1em;
     }
 
 </style>
