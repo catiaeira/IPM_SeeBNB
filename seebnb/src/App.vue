@@ -7,7 +7,7 @@ import Bottom from './components/Bottom.vue';
   <div id="app">
     <NavBar class="on-top" />
     <router-view class="content"/>
-    <Bottom class="on-top"/>
+    <Bottom />
     <div class="empty"></div>
   </div>
 </template>

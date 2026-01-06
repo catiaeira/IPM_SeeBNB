@@ -30,23 +30,36 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue"
 
-const emit = defineEmits(["update:modelValue", "change"]);
-const slider = ref(null);
-const activeThumb = ref(null);
-const hovered = ref(null);
+const slider = ref(null)
+const hovered = ref(null)
+const activeThumb = ref(null)
 
-const min = 1;
-const max = 5;
-const step = 1;
-const minGap = 1;
+const min = 1
+const max = 5
+const step = 1
+const minGap = 1
 
-const left = ref(min);
-const right = ref(max);
+const props = defineProps({
+  leftValue: { type: Number, default: min },
+  rightValue: { type: Number, default: max }
+})
 
-const leftPercent = computed(() => ((left.value - min) / (max - min)) * 100);
-const rightPercent = computed(() => ((right.value - min) / (max - min)) * 100);
+const emit = defineEmits([
+  "update:leftValue",
+  "update:rightValue",
+  "change"
+])
+
+const left = ref(props.leftValue)
+const right = ref(props.rightValue)
+
+watch(() => props.leftValue, val => left.value = val)
+watch(() => props.rightValue, val => right.value = val)
+
+const leftPercent = computed(() => ((left.value - min) / (max - min)) * 100)
+const rightPercent = computed(() => ((right.value - min) / (max - min)) * 100)
 
 function startDrag(which) {
   activeThumb.value = which;
@@ -69,17 +82,18 @@ function drag(e) {
 
   if (activeThumb.value === "left") left.value = Math.min(Math.max(min, raw), right.value - minGap);
   if (activeThumb.value === "right") right.value = Math.max(Math.min(max, raw), left.value + minGap);
-
-  emit("update:modelValue", [left.value, right.value]);
 }
 
 function stopDrag(move, up) {
-  emit("change", [left.value, right.value]);
-  activeThumb.value = null;
-  window.removeEventListener("mousemove", move);
-  window.removeEventListener("touchmove", move);
-  window.removeEventListener("mouseup", up);
-  window.removeEventListener("touchend", up);
+  emit("update:leftValue", left.value)
+  emit("update:rightValue", right.value)
+  emit("change", { left: left.value, right: right.value })
+
+  activeThumb.value = null
+  window.removeEventListener("mousemove", move)
+  window.removeEventListener("touchmove", move)
+  window.removeEventListener("mouseup", up)
+  window.removeEventListener("touchend", up)
 }
 
 onBeforeUnmount(() => stopDrag(() => {}, () => {}));

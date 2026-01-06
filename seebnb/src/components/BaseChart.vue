@@ -1,7 +1,8 @@
 <template>
   <div class="chart-container">
     <Bar 
-      v-if="chartData.labels.length > 0"
+      v-if="chartData && chartData.labels && chartData.labels.length > 0"
+      :key="theme + props.mainLabel" 
       :data="chartData" 
       :options="chartOptions" 
       :plugins="chartPlugins"
@@ -23,19 +24,19 @@ import {
   Legend
 } from 'chart.js'
 
-import { computed } from 'vue';
+import { computed , onMounted} from 'vue';
 import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-
+import { ref, watch, nextTick } from 'vue';
 
 const pluginBackground = {
   id: 'pluginBackground',
   beforeDraw: (chart) => {
-    const { ctx, chartArea, config } = chart;
+    const { ctx, chartArea } = chart;
 
     if (!chartArea) return;
 
-    const color = config.options.plugins?.chartAreaBackground?.color || '#F2FAFF' // --var(background) 
+    const color = themeColors.value.background 
 
     ctx.save();
     ctx.fillStyle = color;
@@ -91,27 +92,63 @@ const props = defineProps({
   mainLabel : String
 });
 
+// making sure the colors follow the theme  v v v
+onMounted(() => {
+  const currentHTMLTheme = document.documentElement.getAttribute('theme') || 'light';
+  theme.value = currentHTMLTheme;
+
+  const observer = new MutationObserver(() => {
+    theme.value = document.documentElement.getAttribute('theme') || 'light';
+  });
+
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['theme'] });
+});
+
+const theme = ref('light');
+
+const themeColors = ref({
+  light_blue: '',
+  sea_green: '',
+  text: '',
+  background: ''
+});
+
+const getCSSVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+watch(theme, async () => {
+  await nextTick();
+
+  themeColors.value = {
+    light_blue: getCSSVar('--light-blue'),
+    sea_green: getCSSVar('--seagreen'),
+    text:      getCSSVar('--text'),
+    background: getCSSVar('--background')
+  };
+}, { immediate: true });
+
+// ^ ^ ^
+
 const chartData = computed(() => {
   switch (props.mainLabel) {
     case 'listsPerHost':
-      return calcListsPerHost();
+      return calcListsPerHost.value;
 
     case 'listsPerHostCompare':
-      return calcListsPerHostCompare();
+      return calcListsPerHostCompare.value;
 
     case 'ocupationCompare':
-      return calcOcupationCompare(); 
+      return calcOcupationCompare.value; 
     
     case 'trimestral':
-      if      (props.triState == 0) return calcTriListings();
-      else if (props.triState == 1) return calcTriPrice();
-      else if (props.triState == 2) return calcTriOccupation();
-      else return null;
+      if      (props.triState == 0) return calcTriListings.value;
+      else if (props.triState == 1) return calcTriPrice.value;
+      else if (props.triState == 2) return calcTriOccupation.value;
+      else return { labels: [], datasets: [] };
 
     case 'listsPerMonths':
-      return calcListsPerHostMonth();
+      return calcListsPerHostMonth.value;
     default:
-      return null;;
+      return { labels: [], datasets: [] };
   }
 });
 
@@ -129,12 +166,12 @@ const chartOptions = computed (() => ({
     datalabels: {
       align: 'end',   // positions text relative to the anchor
       anchor: 'end',  // anchoring the text to the top of the bar/point
-      color: '#333'
+      color: themeColors.value.text
     },
     legend: { display: false },
 
     customBackground: {
-      color: '#E3E7FF', // --var(cor_fundo_light) 
+    color: themeColors.value.light_blue
     }
   },
   scales: {
@@ -144,15 +181,18 @@ const chartOptions = computed (() => ({
       title: {
         display: true,
         text: chartData.value ? chartData.value.yAxisLabel : '', // Y-axis description
-        font: { size: 15, weight: 'bold' }
+        font: { size: 15, weight: 'bold' },
+        color: themeColors.value.text,
       }
     },
     x : {
       grid: { display: false },  // hides grid lines 
+      ticks: { color: themeColors.value.text },
       title: {
         display: true,
         text: chartData.value ? chartData.value.xAxisLabel : '', // X-axis description
-        font: { size: 15, weight: 'bold' }
+        font: { size: 15, weight: 'bold' },
+        color: themeColors.value.text
       }
     }
   }
@@ -167,8 +207,10 @@ function getHostsTotalListings (listings, counts, LIMIT, LIMIT_TEXT) {
       }
     });
 }
-
-function calcListsPerHost() {
+const calcListsPerHost = computed(() => {
+  if (!props.listings1?.length) {
+    return { labels: [], datasets: [] };
+  }
   const counts = {};
   const LIMIT = 15;
   const LIMIT_TEXT = LIMIT + "+";
@@ -188,7 +230,7 @@ function calcListsPerHost() {
     datasets: [
       {
         data: sortedKeys.map(key => counts[key]), 
-        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        backgroundColor: themeColors.value.light_blue,
         borderColor: '#000000',
         borderWidth: 1,
         categoryPercentage: 0.9,
@@ -196,9 +238,11 @@ function calcListsPerHost() {
       }
     ]
   };
-}
-
-function calcListsPerHostCompare() {
+});
+const calcListsPerHostCompare = computed(() => {
+  if (!props.listings1?.length || !props.listings2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const counts1 = {};
   const counts2 = {};
   const LIMIT = 10;
@@ -240,7 +284,7 @@ function calcListsPerHostCompare() {
       },
       {
         data: data1, 
-        backgroundColor: '#E3E7FF',
+        backgroundColor: themeColors.value.light_blue,
         borderColor: '#000000',
         borderWidth: 1,
         categoryPercentage: categoryPercentage,
@@ -248,7 +292,7 @@ function calcListsPerHostCompare() {
       },
       {
         data: data2, 
-        backgroundColor: '#AAE4E2',
+        backgroundColor: themeColors.value.sea_green,
         borderColor: '#000000',
         borderWidth: 1,
         categoryPercentage: categoryPercentage,
@@ -257,7 +301,7 @@ function calcListsPerHostCompare() {
       
     ],
   };
-}
+});
 
 function countOcupation(listings, counts, buckets) {
   listings.forEach(l => {
@@ -272,7 +316,10 @@ function countOcupation(listings, counts, buckets) {
   });
 }
 
-function calcOcupationCompare() {
+const calcOcupationCompare = computed(() => {
+  if (!props.listings1?.length || !props.listings2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const allValues = [
     ...props.listings1.map(l => l.estimated_occupancy_l365d || 0),
     ...props.listings2.map(l => l.estimated_occupancy_l365d || 0)
@@ -334,7 +381,7 @@ function calcOcupationCompare() {
       },
       {
         data: data1, 
-        backgroundColor: '#E3E7FF',
+        backgroundColor: themeColors.value.light_blue,
         borderColor: '#000000',
         borderWidth: 1,
         categoryPercentage: categoryPercentage,
@@ -342,7 +389,7 @@ function calcOcupationCompare() {
       },
       {
         data: data2, 
-        backgroundColor: '#AAE4E2',
+        backgroundColor: themeColors.value.sea_green,
         borderColor: '#000000',
         borderWidth: 1,
         categoryPercentage: categoryPercentage,
@@ -351,9 +398,12 @@ function calcOcupationCompare() {
       
     ],
   }
-}
+});
 
-function calcTriListings() {
+const calcTriListings = computed(() => {
+  if (!props.listings1?.length || !props.listingsTri1?.length || ! props.listingsTri2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
 
   const dataPoints = [
@@ -368,18 +418,21 @@ function calcTriListings() {
       {
         type: 'line',
         data: dataPoints,
-        borderColor: '#AAE4E2', // --var(cor_barra) 
-        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderColor: themeColors.value.sea_green, 
+        backgroundColor: themeColors.value.light_blue,
         borderWidth: 4,
         tension: 0.4, 
         pointRadius: 4,
-        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+        pointBackgroundColor: themeColors.value.sea_green, 
       }
     ]
   };
-}
+});
 
-function calcTriPrice() {
+const calcTriPrice = computed(() => {
+  if (!props.listings1?.length || !props.listingsTri1?.length || ! props.listingsTri2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
   const triLists = [props.listingsTri2, props.listingsTri1, props.listings1];
 
@@ -406,18 +459,21 @@ function calcTriPrice() {
       {
         type: 'line',
         data: averages,
-        borderColor: '#AAE4E2', // --var(cor_barra) 
-        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderColor: themeColors.value.sea_green,
+        backgroundColor: themeColors.value.light_blue,
         borderWidth: 4,
         tension: 0.4, 
         pointRadius: 4,
-        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+        pointBackgroundColor: themeColors.value.sea_green,
       }
     ]
   };
-}
+});
 
-function calcTriOccupation() {
+const calcTriOccupation = computed(() => {
+  if (!props.listings1?.length || !props.listingsTri1?.length || ! props.listingsTri2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const labels = ['Mar-Mai', 'Jun-Ago', 'Set-Nov'];
   const triLists = [props.listingsTri2, props.listingsTri1, props.listings1];
 
@@ -445,18 +501,21 @@ function calcTriOccupation() {
       {
         type: 'line',
         data: averages,
-        borderColor: '#AAE4E2', // --var(cor_barra) 
-        backgroundColor: '#E3E7FF', // --var(cor_fundo_light) 
+        borderColor: themeColors.value.sea_green,
+        backgroundColor: themeColors.value.light_blue,
         borderWidth: 4,
         tension: 0.4, 
         pointRadius: 4,
-        pointBackgroundColor: '#AAE4E2', // --var(cor_barra) 
+        pointBackgroundColor: themeColors.value.sea_green,
       }
     ]
   };
-}
+})
 
-function calcListsPerHostMonth() {
+const calcListsPerHostMonth = computed(() => {
+  if (!props.listings1?.length || !props.listings2?.length) {
+    return { labels: [], datasets: [] };
+  }
   const monthNames = [
     'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
     'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
@@ -490,8 +549,8 @@ function calcListsPerHostMonth() {
       {
         type: 'line',
         data: dataPoints1,
-        borderColor: '#E3E7FF',
-        backgroundColor: '#E3E7FF',
+        borderColor: themeColors.value.light_blue,
+        backgroundColor: themeColors.value.light_blue,
         borderWidth: 3,
         tension: 0.4, 
         pointRadius: 4,
@@ -499,15 +558,15 @@ function calcListsPerHostMonth() {
       {
         type: 'line',
         data: dataPoints2,
-        borderColor: '#AAE4E2',
-        backgroundColor: '#AAE4E2',
+        borderColor: themeColors.value.sea_green,
+        backgroundColor: themeColors.value.sea_green,
         borderWidth: 3,
         tension: 0.4, 
         pointRadius: 4,
       }
     ]
   };
-}
+});
 
-const chartPlugins = [ChartDataLabels];
+const chartPlugins = [ChartDataLabels, pluginBackground];
 </script>

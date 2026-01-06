@@ -24,7 +24,10 @@
       <!-- Rating -->
       <div class="rating">
         <span class="text">Avaliação:</span>
-        <DoubleSlider v-model="filters.rating" />
+        <DoubleSlider
+          v-model:leftValue="filters.fromRating"
+          v-model:rightValue="filters.toRating"
+        />
       </div>
     </div>
 
@@ -39,9 +42,16 @@
 <script setup>
 import DoubleSlider from "./DoubleSlider.vue"
 import OptionToggle from "./OptionToggle.vue";
+import { watch } from "vue";
+import { useFilters } from '@/composables/useFilters';
 
-const props = defineProps({ filters: Object })
-const filters = props.filters
+const { filters } = useFilters()
+
+watch( filters, (newVal) => {
+    console.log('Filters changed:', { ...newVal })
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>

@@ -1,6 +1,5 @@
 <script setup>
-import sun from '@/assets/sun.png'
-import moon from '@/assets/moon.png'
+import ImageDict from '@/assets/ImageDict'
 import { ref, onMounted } from 'vue'
 
 const theme = ref('light')
@@ -26,8 +25,8 @@ onMounted(() => {
 
 <template>
   <button @click="toggleTheme">
-    <span v-if="theme === 'light'"><img :src="sun" width="30px"/></span>
-    <span v-else><img :src="moon" width="20px"/></span>
+    <span v-if="theme === 'light'"><img :src="ImageDict.sun" width="30px"/></span>
+    <span v-else><img :src="ImageDict.moon" width="20px"/></span>
   </button>
 </template>
 

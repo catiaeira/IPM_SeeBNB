@@ -1,175 +1,163 @@
 <script>
-    import Chart from '@/components/BaseChart.vue';
-    import StatsComponent from '@/components/StatsCard.vue';7
-    import getFilterParams from '@/utils/formatFilter.js';
+  import Chart from '@/components/BaseChart.vue';
+  import StatsComponent from '@/components/StatsCard.vue';
+  import Filters from '@/components/Filters/Filters.vue';
+  import CityIntro from '@/components/CityIntro.vue';
+  import ImageDict from '@/assets/ImageDict';
+  import { useFilters } from '@/composables/useFilters'
+  import { fetchComparisonData } from '@/utils/FetchCityData';
 
-    export default {
-        components : {Chart, StatsComponent},
-        data() {
-            return {
-            listings1: [],
-            listings2: [],
-            calendar1: [],
-            calendar2: [],
+  export default {
+    components : {Chart, StatsComponent, Filters, CityIntro},
+    setup() {
+      const { filters } = useFilters()
+      return { filters }
+    },
+    data() {
+      return {
+        listings1: [],
+        listings2: [],
+        calendar1: [],
+        calendar2: [],
 
-            stats1: null,
-            stats2: null
-            }
+        stats1: null,
+        stats2: null,
+      }
+    },
+    props: {
+        city1: String,
+        city2: String
+    },
+    watch: {
+        '$route.query': {
+            handler: 'fetchData',
+            deep: true
         },
-        props: {
-            city1: String,
-            city2: String
+        city1: {
+            handler: 'fetchData',
+            immediate: false
         },
-        computed: {
-          filters() {
-            return {
-              private_room: this.$route.query.private_room === 'true',
-              shared_room: this.$route.query.shared_room === 'true',
-              apt: this.$route.query.apt === 'true',
-              hotel: this.$route.query.hotel === 'true',
-              priceMin: this.$route.query.priceMin
-                ? Number(this.$route.query.priceMin)
-                : null,
-              priceMax: this.$route.query.priceMax
-                ? Number(this.$route.query.priceMax)
-                : null,
-              rating: this.$route.query.rating
-                ? Number(this.$route.query.rating)
-                : 0,
-              short: this.$route.query.short === 'true',
-              long: this.$route.query.long === 'true'
-            }
+        city2: {
+            handler: 'fetchData',
+            immediate: false
+        },
+        filters: {
+          deep: true,
+          handler(newFilters) {
+            this.$router.replace({
+              query: Object.fromEntries(
+                Object.entries(newFilters).filter(
+                  ([, v]) => v !== null && v !== false && v !== 0
+                )
+              )
+            })
           }
-        },
-        watch: {
-            '$route.query': {
-                handler: 'fetchData',
-                deep: true
-            },
-            city1: {
-                handler: 'fetchData',
-                immediate: false
-            },
-            city2: {
-                handler: 'fetchData',
-                immediate: false
-            }
-        },
-        async created() {
-            await this.fetchData();
-        },
-        methods: {    
-            async fetchData() {
-                try {
-                  const cities = [this.city1, this.city2];
-                    for (let i = 0; i<2; i++){
-                        const city = cities[i];
-                        console.log("Fetching data for:", city);
-                        let link = `http://localhost:3000/${city}.listings`;
-                        const filter_str = getFilterParams (this.filters);
-                        const link_w_filter = filter_str ? link + '?' + filter_str : link;
-                        
-                        const response = await fetch(link_w_filter);
-                        
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        
-                        const data = await response.json();
-                        if (i==0) this.listings1 = data;
-                        else this.listings2 = data;
-
-                        console.log(`Successfully loaded ${data.length} listings.`);
-                    }
-                    for (let i = 0; i<2; i++){
-                        const city = cities[i];
-                        console.log("Fetching calendar data for:", city);
-                        let link = `http://localhost:3000/${city}.calendar`;
-                        const response = await fetch(link);
-                        if (!response.ok) throw new Error('Network response was not ok');
-
-                        const data = await response.json();
-                        
-                        if (i==0) {
-                          const availableIds = new Set(this.listings1.map(item =>  parseInt(item.id)));
-                          this.calendar1 = data.filter(listing => {
-                            return availableIds.has(listing.listing_id);
-                          });
-                          console.log(`Successfully loaded ${this.calendar1.length} listings.`);
-                        }
-                        else {
-                          const availableIds = new Set(this.listings2.map(item =>  parseInt(item.id)));
-                          this.calendar2 = data.filter(listing => {
-                            return availableIds.has(listing.listing_id);
-                          });
-                          console.log(`Successfully loaded ${this.calendar2.length} listings.`);  
-                        }
-                        
-                    }
-                  } catch (error) {
-                      console.error("Fetch failed:", error);
-                }
-            },
         }
+    },
+    async created() {
+        await this.fetchData();
+    },
+    methods: {   
+      async fetchData() {
+        if (!this.city1 || !this.city2) return;
+        this.setFilters();
+        try {
+          const data = await fetchComparisonData(
+            this.city1, 
+            this.city2, 
+            this.filters
+          );
+
+          this.listings1 = data.city1.listings;
+          this.calendar1 = data.city1.calendar;
+          this.listings2 = data.city2.listings;
+          this.calendar2 = data.city2.calendar;
+
+          console.log("Comparison data loaded successfully");
+        } catch (error) {
+          console.error("Fetch failed:", error);
+          this.$router.push({ 
+            name: 'NotFound',
+            params: { notFound: 'data-not-found' }
+          });
+        }
+      },
+
+      setFilters(){
+        const query = this.$route.query
+          this.filters.private_room = query.private_room === 'true';
+          this.filters.shared_room  = query.shared_room === 'true';
+          this.filters.apt          = query.apt === 'true';
+          this.filters.hotel        = query.hotel === 'true';
+          this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
+          this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
+          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
+          this.filters.short        = query.short === 'true';
+          this.filters.long         = query.long === 'true';
+      }
+    },
+    computed: {
+      getArrow() {
+        return ImageDict.arrow
+      }
     }
+  }
 </script>   
 <template>
   <div class="page">
-    <div class="names">
-      <div class="cityName1">{{ city1 }}</div> 
-      <div class="cityName2">{{ city2 }}</div> 
+    <div class="cards">
+      <CityIntro class="item" :cityname="city1" color="var(--seagreen)"   @click="$router.push({ name: 'City', params: { city: city1 }})"/>
+      <CityIntro class="item" :cityname="city2" color="var(--light-blue)" @click="$router.push({ name: 'City', params: { city: city2 }})"/>
     </div>
 
-    <div class="top">
+    <div class="filter-wrapper">
+      <Filters />
+    </div>
+
+    <div class="top" id="citiesStats">
 
       <div class="stats">
         <StatsComponent
           :allListings="listings1"
           @stats="s => stats1 = s"
+          :style="{ borderRadius: '12px 0 0 12px' }"
           />
       </div>
-      <ul class="arrows">
-        <li :class="stats1 && stats2 && stats1.rating > stats2.rating ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-        <li :class="stats1 && stats2 && stats1.price > stats2.price ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-        <li :class="stats1 && stats2 && stats1.nights > stats2.nights ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-        <li :class="stats1 && stats2 && stats1.profit > stats2.profit ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-        <li :class="stats1 && stats2 && stats1.numListings > stats2.numListings ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-        <li :class="stats1 && stats2 && stats1.shortRental > stats2.shortRental ? 'point-left' : 'point-right'">
-          <!--<img src="/arrow.svg" />-->->
-        </li>
-      </ul>
+
+      <div class="arrows">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.rating > stats2.rating ? 'point-left' : 'point-right'">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.price > stats2.price ? 'point-left' : 'point-right'">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.nights > stats2.nights ? 'point-left' : 'point-right'">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.profit > stats2.profit ? 'point-left' : 'point-right'">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.numListings > stats2.numListings ? 'point-left' : 'point-right'">
+        <img :src="getArrow" :class="stats1 && stats2 && stats1.shortRental > stats2.shortRental ? 'point-left' : 'point-right'">
+      </div>
 
       <div class="stats">
         <StatsComponent
           :allListings="listings2"
           @stats="s => stats2 = s"
+          :style="{ borderRadius: '0 12px 12px 0' }"
           />
       </div>
     </div>
 
-    <div class="chart">
+    <div class="chart" id="monthChart">
       <Chart
         :listings1= "calendar1"
         :listings2= "calendar2"
         mainLabel="listsPerMonths"
       />
     </div>
-    <div class="chart">
+    <div class="chart" id="ocupationChart">
       <Chart
         :listings1= "listings1"
         :listings2="listings2"
         mainLabel="ocupationCompare"
       />
     </div>
-    <div class="chart">
+    <div class="chart" id="listsChart">
       <Chart
         :listings1= "listings1"
         :listings2="listings2"
@@ -181,13 +169,25 @@
 
 <style scoped>
 .page {
-  width: 90%;
-  margin: 0 auto;
-  padding: 2rem 0;
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
+
+.cards{
+  display: flex;
+}
+
+.item {
+  width: 50%;
+  cursor: pointer;
+}
+  
+.filter-wrapper {
+    width: 90%;
+    align-self: center;
+}
+
 .cityName {
   -webkit-text-stroke: 1px rgb(255, 255, 255);
   font-size: 30px;
@@ -195,33 +195,33 @@
 }
 
 .top {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 2rem;
-  align-items: stretch;
+  display: flex;
+  padding: 0 2%; 
+  box-sizing: border-box;
 }
 
 .stats {
-  display: flex;
-  flex-direction: column;
+  width: 50%;
 }
 
 .arrows {
-  list-style: none;
   display: flex;
   flex-direction: column;
-  padding-top: 2rem;
-  padding-bottom: 3rem;
-  justify-content: space-between;
-  transform: translateX(-25%);
+  align-items: center;
+  justify-content: center;
+  gap: 1.3rem;
+  background-color: var(--blue);
+  padding: 0 2rem;
 }
+
 .point-left {
-  transform: rotate(180deg);
-  transition: transform 0.3s ease;
+ rotate: -45deg;
+ width: 50px;
 }
+
 .point-right {
-  transform: rotate(0deg);
-  transition: transform 0.3s ease;
+  rotate: 45deg;
+  width: 50px;
 }
 
 .chart {

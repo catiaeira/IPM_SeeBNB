@@ -1,25 +1,43 @@
 <script>    
-    import MapComponent from '@/components/Map.vue';
-    import Chart from '@/components/BaseChart.vue';
-    import StatsComponent from '@/components/StatsCard.vue';
-    import CityIntro from '@/components/CityIntro.vue';
-    import getFilterParams from '@/utils/formatFilter.js';
-    import Table from '@/components/Table.vue';
-    import { filterBy, mostAffectedArea, percentChange } from '@/utils/listingAnalytics';
+  import MapComponent from '@/components/Map.vue';
+  import Chart from '@/components/Bay7seChart.vue';
+  import StatsComponent from '@/components/StatsCard.vue';
+  import CityIntro from '@/components/CityIntro.vue';
+  import Filters from '@/components/Filters/Filters.vue';
+  import { useFilters } from '@/composables/useFilters'
+  import { fetchCityData } from '@/utils/FetchCityData';
+  import Table from '@/components/Table.vue';
+  import { filterBy, mostAffectedArea, percentChange } from '@/utils/listingAnalytics';
 
-    export default {
-        components : {MapComponent, Chart, StatsComponent, CityIntro, Table},
-        data() {
-            return {
-            allListings: [],
-            listingsTri1:[],
-            listingsTri2:[],
-            triStates: ['Listagens', 'Preço', 'Ocupação'],
-            trimestralState: 0 // listings = 0, price, occupation
-            }
+  export default {
+    components : {MapComponent, Chart, StatsComponent, CityIntro, Filters, Table},
+    setup() {
+      const { filters } = useFilters()
+      return { filters }
+    },
+    data() {
+      return {
+        allListings: [],
+        listingsTri1:[],
+        listingsTri2:[],
+        triStates: ['Listagens', 'Preço', 'Ocupação'],
+        trimestralState: 0, // listings = 0, price, occupation
+      }
+    },
+    props: {
+      city: String,
+    },
+    async created() {
+        await this.fetchData();
+    },
+    watch: {
+        '$route.query': {
+            handler: 'fetchData',
+            deep: true
         },
-        props: {
-          city: String,
+        city: {
+            handler: 'fetchData',
+            immediate: false
         },
         computed: {
           filters() {
@@ -173,84 +191,79 @@
             return rows
           }
         },
-        async created() {
-            await this.fetchData();
-        },
-        watch: {
-            '$route.query': {
-                handler: 'fetchData',
-                deep: true
-            },
-            city: {
-                handler: 'fetchData',
-                immediate: false
-            }
-        },
-        methods: {    
-            async fetchData() {
-                if (!this.city) return;
-                try {
-                    console.log("Fetching data for:", this.city);
-                    console.log ("Filters: ", this.filters)
-
-                    for (let i = 0; i<3; i++){
-                      let link = `http://localhost:3000/${this.city}.listings`;
-                      if (i>0) link = link.concat (`(${i})`);
-                      const filter_str = getFilterParams (this.filters);
-                      const link_w_filter = filter_str ? link + '?' + filter_str : link
-                      
-                      console.log("link with filter :", link_w_filter);
-                      const response = await fetch(link_w_filter);
-                      if (!response.ok) throw new Error('Network response was not ok');
-                      
-                      const data = await response.json();
-                      
-                      switch (i) {
-                        case 0:
-                          this.allListings = data;
-                          break;
-                        case 1:
-                          this.listingsTri1 = data;
-                          break;
-                        case 2:
-                          this.listingsTri2 = data;
-                          break;
-                        default:
-                          break;
-                      }                      
-                      const target =
-                        i === 0 ? this.allListings :
-                        i === 1 ? this.listingsTri1 :
-                                  this.listingsTri2;
-
-                      console.log(`Successfully loaded ${target.length} listings.`);
-                    }
-                  } catch (error) {
-                      console.error("Fetch failed:", error);
-                }
-            },
-
-            changeTrimestralDataState(direction) {
-              let state = this.trimestralState;
-              if (direction === 'up') state ++;
-              else state --;
-              if (state < 0) state = this.triStates.length - 1;
-              else if (state > this.triStates.length - 1) state = 0;
-
-              this.trimestralState = state;
-            }
+        filters: {
+          deep: true,
+          handler(newFilters) {
+            this.$router.replace({
+              query: Object.fromEntries(
+                Object.entries(newFilters).filter(
+                  ([, v]) => v !== null && v !== false && v !== 0
+                )
+              )
+            })
+          }
         }
+    },
+    methods: {    
+      async fetchData() {
+        if (!this.city) return;
+        this.setFilters();
+
+        try {
+          const data = await fetchCityData(this.city, this.filters);
+          
+          this.allListings = data.mainListings;
+          this.listingsTri1 = data.trimestral1;
+          this.listingsTri2 = data.trimestral2;
+
+          console.log(`Loaded ${this.allListings.length + this.listingsTri1.length + this.listingsTri2.length} total listings.`);
+        } catch (error) {
+          console.error("Fetch failed, redirecting:", error);
+          this.$router.push({ 
+            name: 'NotFound',
+            params: { notFound: 'data-not-found' }
+          });
+        }
+      },
+      changeTrimestralDataState(direction) {
+        let state = this.trimestralState;
+        if (direction === 'up') state ++;
+        else state --;
+        if (state < 0) state = this.triStates.length - 1;
+        else if (state > this.triStates.length - 1) state = 0;
+
+        this.trimestralState = state;
+      },
+
+      setFilters(){
+        const query = this.$route.query
+          this.filters.private_room = query.private_room === 'true';
+          this.filters.shared_room  = query.shared_room === 'true';
+          this.filters.apt          = query.apt === 'true';
+          this.filters.hotel        = query.hotel === 'true';
+          this.filters.priceMin     = query.priceMin ? Number(query.priceMin) : null;
+          this.filters.priceMax     = query.priceMax ? Number(query.priceMax) : null;
+          this.filters.fromRating       = query.fromRating ? Number(query.fromRating) : 1;
+          this.filters.toRating       = query.toRating ? Number(query.toRating) : 5;
+          this.filters.short        = query.short === 'true';
+          this.filters.long         = query.long === 'true';
+      }
     }
+  }
 
 </script>
 
 <template>
   <div class="page">
-    <CityIntro :cityname="city" color="var(--seagreen)"/>
-
+    <CityIntro :cityname="this.city" color="var(--seagreen)"/>
+    
+    <div class="filter-wrapper">
+      <Filters />
+    </div>
+    
     <div class="top">
 
-      <div class="stats">
+      <div class="stats" id="stats">
         <StatsComponent
           :allListings="allListings"
           />
@@ -275,7 +288,32 @@
         
       </div>
 
-      <div class="trimestral-chart">
+      <!-- to export -->
+      <div class="off-screen-stage trimestral-chart">
+        <div id="export-tri-list">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="0" 
+          mainLabel="trimestral"/>
+        </div>
+        <div id="export-tri-price">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="1" 
+          mainLabel="trimestral"/>
+        </div>
+        <div id="export-tri-ocup">
+          <Chart :listings1="allListings"
+          :listingsTri1="listingsTri1"
+          :listingsTri2="listingsTri2" 
+          :triState="2" 
+          mainLabel="trimestral"/>
+        </div>
+      </div>
+
+      <div class="trimestral-chart" id="trimestralChart">
         <Chart
           :listings1="allListings"
           :listingsTri1="listingsTri1"
@@ -286,7 +324,7 @@
       </div>
     </div>
 
-    <div class="chart">
+    <div class="chart" id="cityChart">
       <Chart
         :listings1= "allListings"
         mainLabel="listsPerHost"
@@ -328,6 +366,12 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  margin: 0 auto;
+}
+
+.filter-wrapper {
+    width: 90%;
+    align-self: center;
 }
 
 .top {
@@ -335,6 +379,7 @@
   grid-template-columns: 1fr 1.2fr;
   gap: 2rem;
   align-items: stretch;
+  margin: 0 2%;
 }
 
 .map-card {
@@ -372,6 +417,11 @@
 
 .table Table {
   font-size: 1.3em;
+  
+.off-screen-stage {
+  position: absolute;
+  left: -9999px;
+  top: 0;
 }
 
 </style>

@@ -8,6 +8,7 @@
                 :key="city.id"
                 :cityname="city.cityname"
                 :image="city.image"
+                @click="goToCity(city.cityname)"
             />
         </div>
     </div>
@@ -16,13 +17,25 @@
 <script setup>
 import CityCard from "@/components/CityCard.vue"
 import ImageDict from "@/assets/ImageDict";
+import {normalizeCityName} from "@/utils/CityTranslation"
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+function goToCity(orgName) {
+    const name = normalizeCityName(orgName);
+    router.push({ 
+        name: 'City', 
+        params: { city: name } 
+    });
+}
 
 const cities = [
     { id: 1, cityname: "Milão", image:  ImageDict.milan },
     { id: 2, cityname: "Manchester", image: ImageDict.manchester },
-    { id: 3, cityname: "Sevilha", image: ImageDict.sevilla },
+    { id: 3, cityname: "Sevilha", image: ImageDict.seville },
     { id: 4, cityname: "Roma", image: ImageDict.rome },
-    { id: 5, cityname: "Tokyo", image: ImageDict.tokyo },
+    { id: 5, cityname: "Tóquio", image: ImageDict.tokyo },
     { id: 6, cityname: "Sydney", image: ImageDict.sydney },
     { id: 7, cityname: "Londres", image: ImageDict.london },
     { id: 8, cityname: "Paris", image: ImageDict.paris },

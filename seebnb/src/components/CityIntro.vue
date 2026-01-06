@@ -2,7 +2,7 @@
     <div class="background"
         :style="{backgroundImage: image}">
         <div class="overlay">
-            <span class="name">{{ cityname }}</span>
+            <span class="name">{{ cityTranslated }}</span>
             <div class="circle" :style="{ '--circle-color': color }"></div>
         </div>
     </div>
@@ -11,11 +11,14 @@
 <script setup>
 import { computed } from "vue"
 import ImageDict from "@/assets/ImageDict"
+import { translateToPT } from "@/utils/CityTranslation"
 
 const props = defineProps({
     cityname: String,
     color: String
 })
+
+const cityTranslated = translateToPT(props.cityname);
 
 const image = computed(() =>
     `linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0), rgba(0,0,0,0), var(--background)),
@@ -29,16 +32,15 @@ const image = computed(() =>
     background-position: center;
     background-repeat: no-repeat;
     height: 40vh;
+    position: relative;
 }
 
 .overlay {
     display: flex;
-    inset: 0;
-    gap: 1rem;
-    position: relative;
-    top: 65%;
-    left: 5%;
     align-items: center;
+    gap: 1rem;
+    position: absolute;
+    inset: auto auto 20% 5%;
 }
 
 .name {
