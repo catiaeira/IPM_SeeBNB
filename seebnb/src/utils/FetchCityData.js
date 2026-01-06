@@ -1,4 +1,4 @@
-export default function getFilterParams(filter) {
+export default function getFilterParams(filter, tri = null) {
     const params = new URLSearchParams();
     if (filter.private_room) params.append('room_type', 'Private room');
     if (filter.shared_room)  params.append('room_type', 'Shared room');
@@ -11,9 +11,10 @@ export default function getFilterParams(filter) {
     if (filter.short)        params.append('minimum_nights_lte', 30);
     if (filter.long)         params.append('minimum_nights_gte', 30);
     
-    if (filter.fromRating)   params.append('review_scores_rating_gte', filter.fromRating);
-    if (filter.toRating)   params.append('review_scores_rating_lte', filter.toRating);
-
+    if (!tri){
+        if (filter.fromRating)   params.append('review_scores_rating_gte', filter.fromRating);
+        if (filter.toRating)     params.append('review_scores_rating_lte', filter.toRating);
+    }
     return params.toString();
 }
 
@@ -21,11 +22,12 @@ export default function getFilterParams(filter) {
 export async function fetchCityData(city, filters) {
   if (!city) return null;
 
-  const filterStr = getFilterParams(filters);
-  
   const requests = [0, 1, 2].map(i => {
     let link = `http://localhost:3000/${city}.listings`;
     if (i > 0) link += `(${i})`;
+
+    const filterStr = getFilterParams(filters, i>0);
+  
     const url = filterStr ? `${link}?${filterStr}` : link;
     
     return fetch(url).then(res => {
