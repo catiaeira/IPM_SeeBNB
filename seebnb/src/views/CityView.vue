@@ -6,9 +6,11 @@
   import Filters from '@/components/Filters/Filters.vue';
   import { useFilters } from '@/composables/useFilters'
   import { fetchCityData } from '@/utils/FetchCityData';
+  import Table from '@/components/Table.vue';
+  import { filterBy, mostAffectedArea, percentChange } from '@/utils/listingAnalytics';
 
   export default {
-    components : {MapComponent, Chart, StatsComponent, CityIntro, Filters},
+    components : {MapComponent, Chart, StatsComponent, CityIntro, Filters, Table},
     setup() {
       const { filters } = useFilters()
       return { filters }
@@ -36,6 +38,158 @@
         city: {
             handler: 'fetchData',
             immediate: false
+        },
+        computed: {
+          filters() {
+            return {
+              private_room: this.$route.query.private_room === 'true',
+              shared_room: this.$route.query.shared_room === 'true',
+              apt: this.$route.query.apt === 'true',
+              hotel: this.$route.query.hotel === 'true',
+              priceMin: this.$route.query.priceMin
+                ? Number(this.$route.query.priceMin)
+                : null,
+              priceMax: this.$route.query.priceMax
+                ? Number(this.$route.query.priceMax)
+                : null,
+              rating: this.$route.query.rating
+                ? Number(this.$route.query.rating)
+                : 0,
+              short: this.$route.query.short === 'true',
+              long: this.$route.query.long === 'true'
+            }
+          },
+
+          listingsOver250Current() {
+            return filterBy(this.allListings, l => l.estimated_occupancy_l365d > 250)
+          },
+
+          listingsOver250Prev() {
+            return filterBy(this.listingsTri1, l => l.estimated_occupancy_l365d > 250)
+          },
+
+          hostsOver5ListingsCurrent() {
+            return filterBy(this.allListings, l => l.host_total_listings_count > 5)
+          },
+
+          hostsOver5ListingsPrev() {
+            return filterBy(this.listingsTri1, l => l.host_total_listings_count > 5)
+          },
+
+          unregisteredListingsCurrent() {
+            return filterBy(this.allListings, l => !l.license)
+          },
+
+          unregisteredListingsPrev() {
+            return filterBy(this.listingsTri1, l => !l.license)
+          },
+
+          countOver250Current() {
+            return this.listingsOver250Current.length
+          },
+
+          countOver250Prev() {
+            return this.listingsOver250Prev.length
+          },
+
+          countHostsOver5Current() {
+            return this.hostsOver5ListingsCurrent.length
+          },
+
+          countHostsOver5Prev() {
+            return this.hostsOver5ListingsPrev.length
+          },
+
+          countUnregisteredCurrent() {
+            return this.unregisteredListingsCurrent.length
+          },
+
+          countUnregisteredPrev() {
+            return this.unregisteredListingsPrev.length
+          },
+
+          over250PrevComparePercent() {
+            return percentChange(this.countOver250Current, this.countOver250Prev)
+          },
+
+          hostsOver5PrevComparePercent() {
+            return percentChange(this.countHostsOver5Current, this.countHostsOver5Prev)
+          },
+
+          unregisteredPrevComparePercent() {
+            return percentChange(this.countUnregisteredCurrent, this.countUnregisteredPrev)
+          },
+
+          mostAffectedAreaOver250() {
+            return mostAffectedArea(this.listingsOver250Current)
+          },
+
+          mostAffectedAreaHostsOver5() {
+            return mostAffectedArea(this.hostsOver5ListingsCurrent)
+          },
+
+          mostAffectedAreaUnregistered() {
+            return mostAffectedArea(this.unregisteredListingsCurrent)
+          },
+
+          regulationTableRows() {
+            return [
+              [
+                'Alojamentos >250 dias/ano',
+                this.countOver250Current,
+                this.mostAffectedAreaOver250,
+                this.over250PrevComparePercent !== null ? `${this.over250PrevComparePercent}%` : '-'
+              ],
+              [
+                'Hosts com 5+ listagens',
+                this.countHostsOver5Current,
+                this.mostAffectedAreaHostsOver5,
+                this.hostsOver5PrevComparePercent !== null ? `${this.hostsOver5PrevComparePercent}%` : '-'
+              ],
+              [
+                'ALs sem registo',
+                this.countUnregisteredCurrent,
+                this.mostAffectedAreaUnregistered,
+                this.unregisteredPrevComparePercent !== null ? `${this.unregisteredPrevComparePercent}%` : '-'
+              ]
+            ]
+          },
+
+          zoneStats() {
+            const zones = {}
+
+            for(const l of this.allListings) {
+              const zone = l.neighbourhood_group_cleansed || 'Unknown'
+
+              if(!zones[zone]) {
+                zones[zone] = {
+                  listingsCount: 0,
+                  totalOccupancy: 0,
+                  totalPrice: 0
+                }
+              }
+              
+              const stats = zones[zone]
+              stats.listingsCount++
+              stats.totalOccupancy += l.estimated_occupancy_l365d || 0
+              stats.totalPrice += Number(l.price) || 0
+            }
+
+            return zones
+          },
+
+          zoneTableRows() {
+            const rows = []
+
+            for(const zone in this.zoneStats) {
+              const stats = this.zoneStats[zone]
+              const averageOccupancy = stats.totalOccupancy / stats.listingsCount
+              const averagePrice = stats.totalPrice / stats.listingsCount
+              rows.push([zone, averageOccupancy, stats.listingsCount, averagePrice])
+            }
+
+            return rows
+          }
         },
         filters: {
           deep: true,
@@ -98,6 +252,7 @@
   }
 
 </script>
+
 <template>
   <div class="page">
     <CityIntro :cityname="this.city" color="var(--seagreen)"/>
@@ -105,6 +260,7 @@
     <div class="filter-wrapper">
       <Filters />
     </div>
+    
     <div class="top">
 
       <div class="stats" id="stats">
@@ -174,6 +330,34 @@
         mainLabel="listsPerHost"
       />
     </div>
+
+    <div class="table">
+      <h1>Elementos para regularização (último trimestre)</h1>
+      <br>
+      <Table
+        :columns="[
+          { label: 'Indicador', sortable: false },
+          { label: 'Valor', sortable: false },
+          { label: 'Zona mais afetada', sortable: false },
+          { label: 'Comparação trimestral', sortable: false }
+        ]"
+        :rows="regulationTableRows"
+      />
+    </div>
+
+    <div class="table">
+      <h1>Dados por zona (último trimestre)</h1>
+      <br>
+      <Table
+        :columns="[
+          { label: 'Zona', sortable: true },
+          { label: 'Ocupação média', sortable: true, format: v => `${Number(v).toFixed(1)}` },
+          { label: 'Número de Listagens', sortable: true, format: v => `${Number(v).toFixed(0)}` },
+          { label: 'Preço médio ($)', sortable: true, format: v => `${Number(v).toFixed(2)}` },
+        ]"
+        :rows="zoneTableRows"
+      />
+    </div>
   </div>
 </template>
 
@@ -225,6 +409,16 @@
   padding: 1.5rem;
 }
 
+.table {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table Table {
+  font-size: 1.3em;
+}
+  
 .off-screen-stage {
   position: absolute;
   left: -9999px;
