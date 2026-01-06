@@ -327,7 +327,7 @@
       />
     </div>
 
-    <div class="table">
+    <div class="table" id="tableReg">
       <h1>Elementos para regularização (último trimestre)</h1>
       <br>
       <Table
@@ -341,7 +341,7 @@
       />
     </div>
 
-    <div class="table">
+    <div class="table" id="tableZone">
       <h1>Dados por zona (último trimestre)</h1>
       <br>
       <Table
