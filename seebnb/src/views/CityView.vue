@@ -135,6 +135,42 @@
                 this.unregisteredPrevComparePercent !== null ? `${this.unregisteredPrevComparePercent}%` : '-'
               ]
             ]
+          },
+
+          zoneStats() {
+            const zones = {}
+
+            for(const l of this.allListings) {
+              const zone = l.neighbourhood_group_cleansed || 'Unknown'
+
+              if(!zones[zone]) {
+                zones[zone] = {
+                  listingsCount: 0,
+                  totalOccupancy: 0,
+                  totalPrice: 0
+                }
+              }
+              
+              const stats = zones[zone]
+              stats.listingsCount++
+              stats.totalOccupancy += l.estimated_occupancy_l365d || 0
+              stats.totalPrice += Number(l.price) || 0
+            }
+
+            return zones
+          },
+
+          zoneTableRows() {
+            const rows = []
+
+            for(const zone in this.zoneStats) {
+              const stats = this.zoneStats[zone]
+              const averageOccupancy = stats.totalOccupancy / stats.listingsCount
+              const averagePrice = stats.totalPrice / stats.listingsCount
+              rows.push([zone, averageOccupancy, stats.listingsCount, averagePrice])
+            }
+
+            return rows
           }
         },
         async created() {
@@ -263,11 +299,25 @@
       <Table
         :columns="[
           { label: 'Indicador', sortable: false },
-          { label: 'Valor', sortable: true },
+          { label: 'Valor', sortable: false },
           { label: 'Zona mais afetada', sortable: false },
-          { label: 'Comparação trimestral', sortable: true }
+          { label: 'Comparação trimestral', sortable: false }
         ]"
         :rows="regulationTableRows"
+      />
+    </div>
+
+    <div class="table">
+      <h1>Dados por zona (último trimestre)</h1>
+      <br>
+      <Table
+        :columns="[
+          { label: 'Zona', sortable: true},
+          { label: 'Ocupação média', sortable: true},
+          { label: 'Número de Listagens', sortable: true},
+          { label: 'Preço médio ($)', sortable: true},
+        ]"
+        :rows="zoneTableRows"
       />
     </div>
   </div>

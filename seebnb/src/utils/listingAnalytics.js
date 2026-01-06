@@ -25,5 +25,5 @@ export function mostAffectedArea(listings) {
 
 export function percentChange(curr, prev) {
   if (prev === 0) return null
-  return (((curr - prev) / prev) * 100).toFixed(1)
+  return (((curr - prev) / prev) * 100)
 }

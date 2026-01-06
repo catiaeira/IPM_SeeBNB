@@ -9,7 +9,7 @@
           <span>{{ col.label }}</span>
 
           <button
-            v-show="col.sortable"
+            v-if="col.sortable"
             @click="toggleSort(colIndex)"
             class="sort-btn"
           >
@@ -22,7 +22,7 @@
     <tbody>
       <tr v-for="(row, rowIndex) in sortedRows" :key="rowIndex">
         <td v-for="(cell, cellIndex) in row" :key="cellIndex">
-          {{ cell }}
+          {{ formatCell(cell) }}
         </td>
       </tr>
     </tbody>
@@ -73,6 +73,14 @@ function sortIndicator(colIndex) {
   if (sortColumn.value !== colIndex) return '⇅'
   return sortDirection.value === 1 ? '↑' : '↓'
 }
+
+function formatCell(value) {
+  if(typeof value === 'number' && !Number.isInteger(value)) {
+    return value.toFixed(2)
+  }
+  return value
+}
+
 </script>
 
 
