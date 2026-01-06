@@ -261,9 +261,14 @@
       <h1>Elementos para regularização (último trimestre)</h1>
       <br>
       <Table
-        :columns="['Indicador', 'Valor', 'Zona mais afetada', 'Comparação trimestral']"
-        :rows="regulationTableRows">
-      </Table>
+        :columns="[
+          { label: 'Indicador', sortable: false },
+          { label: 'Valor', sortable: true },
+          { label: 'Zona mais afetada', sortable: false },
+          { label: 'Comparação trimestral', sortable: true }
+        ]"
+        :rows="regulationTableRows"
+      />
     </div>
   </div>
 </template>
