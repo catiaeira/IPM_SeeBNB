@@ -11,6 +11,14 @@
   </div>
 </template>
 
+<style scoped>
+.chart-container {
+  width: 100%;
+  height: 30vh;
+}
+
+</style>
+
 <script setup>
 import {
   Chart as ChartJS,
@@ -155,6 +163,7 @@ const chartData = computed(() => {
 
 const chartOptions = computed (() => ({
   responsive: true,
+  maintainAspectRatio: false,
   layout: {
     padding: {
       top: 35,
@@ -183,6 +192,9 @@ const chartOptions = computed (() => ({
         text: chartData.value ? chartData.value.yAxisLabel : '', // Y-axis description
         font: { size: 15, weight: 'bold' },
         color: themeColors.value.text,
+      },
+      border: {
+        color: themeColors.value.text,
       }
     },
     x : {
@@ -193,6 +205,9 @@ const chartOptions = computed (() => ({
         text: chartData.value ? chartData.value.xAxisLabel : '', // X-axis description
         font: { size: 15, weight: 'bold' },
         color: themeColors.value.text
+      },
+      border: {
+        color: themeColors.value.text,
       }
     }
   }

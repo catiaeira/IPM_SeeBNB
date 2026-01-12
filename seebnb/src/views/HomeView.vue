@@ -51,6 +51,10 @@
                 alert("No data found for that city / Filter too specific");
             }
         } else if (location1 && location2) {
+            if (location1 == location2) {
+                alert ("Cities are the same!");
+                return;
+            }
             const [exists1, exists2] = await Promise.all([dataExists(location1, filter), dataExists(location2, filter)]);
             
             if (exists1 && exists2) {
