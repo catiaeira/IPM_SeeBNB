@@ -398,16 +398,23 @@
   flex-direction: row;
   align-items: center;
   align-self: center;
+  width: 60%;
   gap: 2rem; 
 }
 
 .trimestral-chart {
   border-radius: 12px;
+  width: 80%;
 }
 
 .chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
   border-radius: 12px;
   padding: 1.5rem;
+  width: 80%;
 }
 
 .table {
@@ -427,19 +434,17 @@
 }
 
 .graphs-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
-  height: 40vh;
+  display: flex;
+  justify-content: center;
 }
 
 #triButton {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 2rem;
-  height: 8rem;
+  width: 3rem;
+  height: 12rem;
   border-radius: 12px
 }
 
@@ -464,7 +469,12 @@
   padding: 2px;
   height: 60%;
   text-align: center;
+  align-content: center;
   border: 2px solid var(--text);
+  border-bottom: none;
+  border-top: none;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
 .button {
@@ -483,11 +493,6 @@
 
 .down{
   border-radius: 0 0 12px 12px;
-}
-
-#label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
 }
 
 </style>

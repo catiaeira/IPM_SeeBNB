@@ -224,8 +224,13 @@
 }
 
 .chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
   border-radius: 12px;
   padding: 1.5rem;
+  width: 80%;
 }
 
 </style>
