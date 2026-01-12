@@ -1,7 +1,7 @@
 <template>
   <div id="page">
     <div class="container">
-      <span>DATA NOT FOUND</span>
+      <span>DADOS NÃO ENCONTRADOS</span>
     </div>
 
     <canvas ref="canvasRef" id="animation"></canvas>

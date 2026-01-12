@@ -153,7 +153,7 @@
         const zones = {}
 
         for(const l of this.allListings) {
-          const zone = l.neighbourhood_group_cleansed || 'Unknown'
+          const zone = l.neighbourhood_group_cleansed || 'N/A'
 
           if(!zones[zone]) {
             zones[zone] = {

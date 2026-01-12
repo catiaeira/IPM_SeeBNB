@@ -15,6 +15,13 @@ const router = createRouter({
     { path: '/compare/:city1/:city2', name: "Compare", component: CompareView, props: true },
     { path: '/:notFound(.*)', name: "NotFound", component: NotFoundView }
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    return { top: 0 }
+  }
 })
 
 export default router

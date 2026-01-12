@@ -48,11 +48,11 @@
                     )
                 }});
             } else {
-                alert("No data found for that city / Filter too specific");
+                alert("Não existem dados para a cidade pedida / Filtro demasiado específico!");
             }
         } else if (location1 && location2) {
             if (location1 == location2) {
-                alert ("Cities are the same!");
+                alert ("Cidade repetida!");
                 return;
             }
             const [exists1, exists2] = await Promise.all([dataExists(location1, filter), dataExists(location2, filter)]);
@@ -67,7 +67,7 @@
                     ))
                 }});
             } else {
-                alert("No data found for that city / Filter too specific");
+                alert("Não existem dados para a cidade pedida / Filtro demasiado específico!");
             }
         }
     }

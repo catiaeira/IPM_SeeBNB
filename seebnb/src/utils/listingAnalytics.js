@@ -6,7 +6,7 @@ export function mostAffectedArea(listings) {
   const counts = {}
 
   for (const l of listings) {
-    const area = l.neighbourhood_group_cleansed || 'Unknown'
+    const area = l.neighbourhood_group_cleansed || 'N/A'
     counts[area] = (counts[area] || 0) + 1
   }
 
