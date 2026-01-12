@@ -350,7 +350,21 @@ async function createPng() {
     }
     try {
       const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background');
-      const dataUrl = await htmlToImage.toPng(node, {backgroundColor: backgroundColor});
+    
+      const width = node.offsetWidth;
+      const height = node.offsetHeight;
+
+      const dataUrl = await htmlToImage.toPng(node, {
+        backgroundColor: backgroundColor,
+        width: width,   
+        height: height,
+        style: {
+          margin: 0,    
+          transform: 'none',
+          left: 0,
+          top: 0
+        }
+      });
 
       const link = document.createElement('a');
       link.download = `${cities.value}_${elementId}.png`;
