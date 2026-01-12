@@ -71,14 +71,10 @@ onMounted(loadCanvas)
 #page {
   display: flex;
   flex-direction: column;
-  height: 95vh;
 }
 
 #animation {
-  position: absolute;
   color: var(--text);
-  bottom: 10vh;
-  left: 50vw;
 }
 
 .container {

@@ -467,6 +467,7 @@
 
 #label {
   padding: 2px;
+  font-size: 20px;
   height: 60%;
   text-align: center;
   align-content: center;

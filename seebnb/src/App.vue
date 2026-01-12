@@ -6,14 +6,14 @@ import Bottom from './components/Bottom.vue';
 <template>
   <div id="app">
     <NavBar class="on-top" />
-    <router-view class="content"/>
+    <router-view class="content" />
     <Bottom />
-    <div class="empty"></div>
   </div>
 </template>
 
 <style scoped>
-#app{
+#app {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--background) !important;
@@ -24,6 +24,7 @@ import Bottom from './components/Bottom.vue';
 }
 
 .content {
+  flex: 1;
   width: 100%;
   margin: 0;
   padding: 0;
